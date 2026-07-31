@@ -1,5 +1,16 @@
-import type { CanonicalInvoice } from "./invoice";
 import { calculateInvoiceTotals } from "./invoice-calculations";
+import type { CanonicalInvoice, InvoiceLineItem } from "./invoice";
+
+const rp2026001LineItems: InvoiceLineItem[] = [
+  {
+    description: "Beratung und Umsetzung",
+    quantity: 6,
+    unit: "hour",
+    unitPriceCents: 20000,
+    vatCategory: "standard",
+    vatRatePercent: 19,
+  },
+];
 
 export const sampleInvoices: CanonicalInvoice[] = [
   {
@@ -24,25 +35,7 @@ export const sampleInvoices: CanonicalInvoice[] = [
       city: "Berlin",
       countryCode: "DE",
     },
-    lineItems: [
-      {
-        description: "Beratung und Umsetzung",
-        quantity: 6,
-        unit: "hour",
-        unitPriceCents: 20000,
-        vatCategory: "standard",
-        vatRatePercent: 19,
-      },
-    ],
-    totals: calculateInvoiceTotals([
-      {
-        description: "Beratung und Umsetzung",
-        quantity: 6,
-        unit: "hour",
-        unitPriceCents: 20000,
-        vatCategory: "standard",
-        vatRatePercent: 19,
-      },
-    ]),
+    lineItems: rp2026001LineItems,
+    totals: calculateInvoiceTotals(rp2026001LineItems),
   },
 ];
