@@ -10,7 +10,7 @@ const invoices = [
     number: "RP-2026-002",
     customer: "Schneider IT Beratung",
     amount: "856,80 EUR",
-    status: "Pruefbereit",
+    status: "Prüfbereit",
     due: "21.08.2026",
   },
   {
@@ -25,7 +25,7 @@ const invoices = [
 const checks = [
   "Pflichtangaben nach Rechnungstyp erfassen",
   "PDF aus kanonischem Rechnungsmodell erzeugen",
-  "XRechnung XML spaeter technisch validieren",
+  "XRechnung XML später technisch validieren",
   "Keine Steuer-, DATEV-, ELSTER- oder Zahlungsintegration",
 ];
 
@@ -53,7 +53,7 @@ export default function Home() {
           <div className="border-b border-slate-200 px-5 py-4">
             <h2 className="text-lg font-semibold">Rechnungen</h2>
             <p className="mt-1 text-sm text-slate-600">
-              MVP-Daten fuer lokale Erstellung, PDF-Ausgabe und spaetere
+              MVP-Daten für lokale Erstellung, PDF-Ausgabe und spaetere
               XML-Validierung.
             </p>
           </div>
@@ -86,7 +86,7 @@ export default function Home() {
           <div className="border-b border-slate-200 px-5 py-4">
             <h2 className="text-lg font-semibold">MVP-Leitplanken</h2>
             <p className="mt-1 text-sm text-slate-600">
-              Technisch sauber, lokal lauffaehig, ohne
+              Technisch sauber, lokal lauffähig, ohne
               Zertifizierungsversprechen.
             </p>
           </div>
