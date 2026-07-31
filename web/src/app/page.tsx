@@ -1,26 +1,11 @@
-const invoices = [
-  {
-    number: "RP-2026-001",
-    customer: "Musteragentur Berlin",
-    amount: "1.428,00 EUR",
-    status: "Entwurf",
-    due: "14.08.2026",
-  },
-  {
-    number: "RP-2026-002",
-    customer: "Schneider IT Beratung",
-    amount: "856,80 EUR",
-    status: "Prüfbereit",
-    due: "21.08.2026",
-  },
-  {
-    number: "RP-2026-003",
-    customer: "Atelier Nord GmbH",
-    amount: "2.320,50 EUR",
-    status: "Bezahlt",
-    due: "28.07.2026",
-  },
-];
+import { sampleInvoices } from "@/domain/invoice-fixtures";
+import type { InvoiceStatus } from "@/domain/invoice";
+
+const statusLabels: Record<InvoiceStatus, string> = {
+  draft: "Entwurf",
+  review_ready: "Prüfbereit",
+  paid: "Bezahlt",
+};
 
 const checks = [
   "Pflichtangaben nach Rechnungstyp erfassen",
@@ -28,6 +13,17 @@ const checks = [
   "XRechnung XML später technisch validieren",
   "Keine Steuer-, DATEV-, ELSTER- oder Zahlungsintegration",
 ];
+
+function formatCurrency(cents: number) {
+  return new Intl.NumberFormat("de-DE", {
+    style: "currency",
+    currency: "EUR",
+  }).format(cents / 100);
+}
+
+function formatDate(date: string) {
+  return new Intl.DateTimeFormat("de-DE").format(new Date(date));
+}
 
 export default function Home() {
   return (
@@ -53,28 +49,30 @@ export default function Home() {
           <div className="border-b border-slate-200 px-5 py-4">
             <h2 className="text-lg font-semibold">Rechnungen</h2>
             <p className="mt-1 text-sm text-slate-600">
-              MVP-Daten für lokale Erstellung, PDF-Ausgabe und spaetere
+              MVP-Daten für lokale Erstellung, PDF-Ausgabe und spätere
               XML-Validierung.
             </p>
           </div>
 
           <div className="divide-y divide-slate-200">
-            {invoices.map((invoice) => (
+            {sampleInvoices.map((invoice) => (
               <div
-                key={invoice.number}
+                key={invoice.id}
                 className="grid gap-3 px-5 py-4 sm:grid-cols-[1fr_auto]"
               >
                 <div>
                   <p className="font-medium">{invoice.number}</p>
-                  <p className="text-sm text-slate-600">{invoice.customer}</p>
+                  <p className="text-sm text-slate-600">{invoice.buyer.name}</p>
                 </div>
                 <div className="flex items-center gap-4 sm:justify-end">
-                  <span className="text-sm text-slate-600">{invoice.due}</span>
+                  <span className="text-sm text-slate-600">
+                    {formatDate(invoice.dueDate)}
+                  </span>
                   <span className="w-32 text-right font-medium">
-                    {invoice.amount}
+                    {formatCurrency(invoice.totals.grossAmountCents)}
                   </span>
                   <span className="rounded-md border border-slate-200 px-2 py-1 text-xs font-medium">
-                    {invoice.status}
+                    {statusLabels[invoice.status]}
                   </span>
                 </div>
               </div>
