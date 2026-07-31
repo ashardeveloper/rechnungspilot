@@ -1,4 +1,5 @@
 import type { CanonicalInvoice } from "./invoice";
+import { calculateInvoiceTotals } from "./invoice-calculations";
 
 export const sampleInvoices: CanonicalInvoice[] = [
   {
@@ -33,10 +34,15 @@ export const sampleInvoices: CanonicalInvoice[] = [
         vatRatePercent: 19,
       },
     ],
-    totals: {
-      netAmountCents: 120000,
-      vatAmountCents: 22800,
-      grossAmountCents: 142800,
-    },
+    totals: calculateInvoiceTotals([
+      {
+        description: "Beratung und Umsetzung",
+        quantity: 6,
+        unit: "hour",
+        unitPriceCents: 20000,
+        vatCategory: "standard",
+        vatRatePercent: 19,
+      },
+    ]),
   },
 ];
