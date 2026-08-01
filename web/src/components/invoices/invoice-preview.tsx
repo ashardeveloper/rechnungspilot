@@ -1,3 +1,4 @@
+import { calculateLineNetAmountCents } from "@/domain/invoice-calculations";
 import type { CanonicalInvoice } from "@/domain/invoice";
 
 import { formatCurrency, formatDate, formatUnit } from "./formatting";
@@ -90,7 +91,7 @@ export function InvoicePreview({ invoice }: { invoice: CanonicalInvoice }) {
                     {item.vatRatePercent} %
                   </td>
                   <td className="px-5 py-4 text-right font-medium">
-                    {formatCurrency(item.quantity * item.unitPriceCents)}
+                    {formatCurrency(calculateLineNetAmountCents(item))}
                   </td>
                 </tr>
               ))}
