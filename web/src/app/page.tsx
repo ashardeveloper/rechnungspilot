@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+
 import { InvoiceList } from "@/components/invoices/invoice-list";
 import { InvoicePreview } from "@/components/invoices/invoice-preview";
 import { sampleInvoices } from "@/domain/invoice-fixtures";
@@ -10,7 +14,13 @@ const checks = [
 ];
 
 export default function Home() {
-  const selectedInvoice = sampleInvoices[0];
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState(
+    sampleInvoices[0].id,
+  );
+
+  const selectedInvoice =
+    sampleInvoices.find((invoice) => invoice.id === selectedInvoiceId) ??
+    sampleInvoices[0];
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
@@ -31,7 +41,11 @@ export default function Home() {
       </section>
 
       <section className="mx-auto grid max-w-6xl gap-6 px-6 py-8 lg:grid-cols-[1.4fr_0.8fr]">
-        <InvoiceList invoices={sampleInvoices} />
+        <InvoiceList
+          invoices={sampleInvoices}
+          selectedInvoiceId={selectedInvoice.id}
+          onSelectInvoice={setSelectedInvoiceId}
+        />
 
         <aside className="rounded-lg border border-slate-200 bg-white">
           <div className="border-b border-slate-200 px-5 py-4">
