@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useReducer } from "react";
 
 import { InvoiceList } from "@/components/invoices/invoice-list";
 import { InvoicePreview } from "@/components/invoices/invoice-preview";
@@ -12,6 +12,15 @@ import {
   saveInvoicesToStorage,
 } from "@/storage/invoice-storage";
 
+type WorkspaceState = {
+  invoices: CanonicalInvoice[];
+  selectedInvoiceId: string;
+};
+
+type WorkspaceAction =
+  | { type: "select_invoice"; invoiceId: string }
+  | { type: "reset_demo_data" };
+
 const checks = [
   "Pflichtangaben nach Rechnungstyp erfassen",
   "PDF aus kanonischem Rechnungsmodell erzeugen",
@@ -19,30 +28,54 @@ const checks = [
   "Keine Steuer-, DATEV-, ELSTER- oder Zahlungsintegration",
 ];
 
-const initialInvoices = () => loadInvoicesFromStorage(sampleInvoices);
+function createInitialWorkspaceState(): WorkspaceState {
+  const invoices = loadInvoicesFromStorage(sampleInvoices);
+
+  return {
+    invoices,
+    selectedInvoiceId: invoices[0]?.id ?? sampleInvoices[0].id,
+  };
+}
+
+function workspaceReducer(
+  state: WorkspaceState,
+  action: WorkspaceAction,
+): WorkspaceState {
+  switch (action.type) {
+    case "select_invoice":
+      return {
+        ...state,
+        selectedInvoiceId: action.invoiceId,
+      };
+
+    case "reset_demo_data":
+      clearStoredInvoices();
+
+      return {
+        invoices: sampleInvoices,
+        selectedInvoiceId: sampleInvoices[0].id,
+      };
+  }
+}
 
 export default function Home() {
-  const [invoices, setInvoices] = useState<CanonicalInvoice[]>(initialInvoices);
-  const [selectedInvoiceId, setSelectedInvoiceId] = useState(
-    () => initialInvoices()[0]?.id ?? sampleInvoices[0].id,
+  const [state, dispatch] = useReducer(
+    workspaceReducer,
+    undefined,
+    createInitialWorkspaceState,
   );
 
   useEffect(() => {
-    saveInvoicesToStorage(invoices);
-  }, [invoices]);
+    saveInvoicesToStorage(state.invoices);
+  }, [state.invoices]);
 
   const selectedInvoice = useMemo(
     () =>
-      invoices.find((invoice) => invoice.id === selectedInvoiceId) ??
-      invoices[0],
-    [invoices, selectedInvoiceId],
+      state.invoices.find(
+        (invoice) => invoice.id === state.selectedInvoiceId,
+      ) ?? state.invoices[0],
+    [state.invoices, state.selectedInvoiceId],
   );
-
-  function resetDemoData() {
-    clearStoredInvoices();
-    setInvoices(sampleInvoices);
-    setSelectedInvoiceId(sampleInvoices[0].id);
-  }
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
@@ -59,7 +92,7 @@ export default function Home() {
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={resetDemoData}
+              onClick={() => dispatch({ type: "reset_demo_data" })}
               className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700"
             >
               Demo zurücksetzen
@@ -76,9 +109,11 @@ export default function Home() {
 
       <section className="mx-auto grid max-w-6xl gap-6 px-6 py-8 lg:grid-cols-[1.4fr_0.8fr]">
         <InvoiceList
-          invoices={invoices}
+          invoices={state.invoices}
           selectedInvoiceId={selectedInvoice?.id ?? ""}
-          onSelectInvoice={setSelectedInvoiceId}
+          onSelectInvoice={(invoiceId) =>
+            dispatch({ type: "select_invoice", invoiceId })
+          }
         />
 
         <aside className="rounded-lg border border-slate-200 bg-white">
