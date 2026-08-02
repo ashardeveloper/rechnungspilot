@@ -11,6 +11,7 @@ import {
   loadInvoicesFromStorage,
   saveInvoicesToStorage,
 } from "@/storage/invoice-storage";
+import { createDraftInvoice } from "@/domain/invoice-factory";
 
 type WorkspaceState = {
   invoices: CanonicalInvoice[];
@@ -19,6 +20,7 @@ type WorkspaceState = {
 
 type WorkspaceAction =
   | { type: "select_invoice"; invoiceId: string }
+  | { type: "create_draft_invoice" }
   | { type: "reset_demo_data" };
 
 const checks = [
@@ -47,6 +49,15 @@ function workspaceReducer(
         ...state,
         selectedInvoiceId: action.invoiceId,
       };
+
+    case "create_draft_invoice": {
+      const draftInvoice = createDraftInvoice(state.invoices);
+
+      return {
+        invoices: [draftInvoice, ...state.invoices],
+        selectedInvoiceId: draftInvoice.id,
+      };
+    }
 
     case "reset_demo_data":
       clearStoredInvoices();
@@ -99,6 +110,7 @@ export default function Home() {
             </button>
             <button
               type="button"
+              onClick={() => dispatch({ type: "create_draft_invoice" })}
               className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white"
             >
               Neue Rechnung
