@@ -12,6 +12,7 @@ import {
   saveInvoicesToStorage,
 } from "@/storage/invoice-storage";
 import { createDraftInvoice } from "@/domain/invoice-factory";
+import { InvoiceEditor } from "@/components/invoices/invoice-editor";
 
 type WorkspaceState = {
   invoices: CanonicalInvoice[];
@@ -21,6 +22,7 @@ type WorkspaceState = {
 type WorkspaceAction =
   | { type: "select_invoice"; invoiceId: string }
   | { type: "create_draft_invoice" }
+  | { type: "update_invoice"; invoice: CanonicalInvoice }
   | { type: "reset_demo_data" };
 
 const checks = [
@@ -65,6 +67,14 @@ function workspaceReducer(
       return {
         invoices: sampleInvoices,
         selectedInvoiceId: sampleInvoices[0].id,
+      };
+    case "update_invoice":
+      return {
+        ...state,
+        invoices: state.invoices.map((invoice) =>
+          invoice.id === action.invoice.id ? action.invoice : invoice,
+        ),
+        selectedInvoiceId: action.invoice.id,
       };
   }
 }
@@ -147,6 +157,15 @@ export default function Home() {
           </ul>
         </aside>
       </section>
+
+      {selectedInvoice ? (
+        <InvoiceEditor
+          invoice={selectedInvoice}
+          onUpdateInvoice={(invoice) =>
+            dispatch({ type: "update_invoice", invoice })
+          }
+        />
+      ) : null}
 
       {selectedInvoice ? <InvoicePreview invoice={selectedInvoice} /> : null}
     </main>
