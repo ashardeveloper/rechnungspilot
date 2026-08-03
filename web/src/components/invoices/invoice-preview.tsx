@@ -1,3 +1,4 @@
+"use client";
 import { calculateLineNetAmountCents } from "@/domain/invoice-calculations";
 import type { CanonicalInvoice } from "@/domain/invoice";
 
@@ -5,6 +6,9 @@ import { formatCurrency, formatDate, formatUnit } from "./formatting";
 import { invoiceStatusLabels } from "./invoice-status";
 
 export function InvoicePreview({ invoice }: { invoice: CanonicalInvoice }) {
+  function printInvoice() {
+    window.print();
+  }
   return (
     <section className="mx-auto max-w-6xl px-6 pb-10">
       <div className="rounded-lg border border-slate-200 bg-white">
@@ -26,6 +30,13 @@ export function InvoicePreview({ invoice }: { invoice: CanonicalInvoice }) {
             <span className="rounded-md bg-slate-950 px-3 py-1.5 text-sm font-medium text-white">
               {formatCurrency(invoice.totals.grossAmountCents)}
             </span>
+            <button
+              type="button"
+              onClick={printInvoice}
+              className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 print:hidden"
+            >
+              PDF drucken
+            </button>
           </div>
         </div>
 

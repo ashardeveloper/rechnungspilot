@@ -43,7 +43,7 @@ export function InvoiceEditor({
   }
 
   return (
-    <section className="mx-auto max-w-6xl px-6 pb-8">
+    <section className="mx-auto max-w-6xl px-6 pb-8 print:hidden">
       <div className="rounded-lg border border-slate-200 bg-white">
         <div className="border-b border-slate-200 px-5 py-4">
           <h2 className="text-lg font-semibold">Rechnung bearbeiten</h2>

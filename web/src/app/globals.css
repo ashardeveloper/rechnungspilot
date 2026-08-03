@@ -24,3 +24,14 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@media print {
+  body {
+    background: white;
+  }
+
+  @page {
+    size: A4;
+    margin: 16mm;
+  }
+}
