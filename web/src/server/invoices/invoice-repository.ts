@@ -30,3 +30,9 @@ export async function upsertInvoiceForUser(
 
   return toCanonicalInvoice(savedInvoice);
 }
+
+export async function deleteInvoicesForUser(userId: string) {
+  await prisma.invoice.deleteMany({
+    where: { userId },
+  });
+}
