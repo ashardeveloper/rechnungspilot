@@ -1,7 +1,11 @@
 # ADR 0001: Local-first, no-cost architecture
 
-- Status: Accepted
+- Status: Superseded by ADR 0002
 - Date: 2026-07-30
+
+This ADR is kept for historical context. The project direction changed to a
+SaaS-style architecture with backend/database persistence, user-specific
+invoices, and free-tier deployability.
 
 ## Context
 

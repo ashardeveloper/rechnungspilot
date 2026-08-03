@@ -7,11 +7,11 @@ Validation state: Desk research and synthetic workflow analysis
 
 ## 1. One-sentence product
 
-RechnungsPilot DE helps Germany-based independent IT consultants and small
-digital agencies create, validate, send, receive, and track structured
-E-invoices without requiring them to learn XML or operate a complete accounting
-suite. The target segment is a synthetic design persona, not a validated
-customer segment.
+RechnungsPilot DE is a SaaS-style invoice workflow for Germany-based
+independent IT consultants and small digital agencies. It helps authenticated
+users create, validate, export, and track structured E-invoices without
+requiring them to learn XML or operate a complete accounting suite. The target
+segment is a synthetic design persona, not a validated customer segment.
 
 ## 2. Why now
 
@@ -102,6 +102,23 @@ this user needs. A focused tool can reduce uncertainty and manual work without
 claiming to replace accounting or professional tax advice.
 
 ## 6. Value proposition
+
+### Product positioning
+
+RechnungsPilot DE is a SaaS-style invoice workspace, not a browser-only
+local-first tool.
+
+The portfolio story is a serious German-market product with:
+
+- authenticated invoice workspaces;
+- database-backed invoice storage;
+- user-specific invoice records;
+- PDF invoice output;
+- technical validation before export;
+- later XRechnung XML support.
+
+The product must not claim legal certification, tax filing capability, DATEV
+integration, ELSTER integration, Peppol connectivity, banking, or real payments.
 
 ### Functional value
 

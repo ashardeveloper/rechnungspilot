@@ -1,5 +1,24 @@
 # RechnungsPilot DE — Implementation and Learning Plan
 
+## Current architecture decision
+
+The project direction is SaaS-style, not browser-only local-first.
+
+Current implementation priorities:
+
+1. Preserve the existing canonical invoice domain model, calculations,
+   validation, editor, and preview.
+2. Replace prototype localStorage persistence with database-backed persistence.
+3. Introduce Prisma with a local development database first.
+4. Model user-owned invoices from the beginning.
+5. Add authentication after database-backed invoice CRUD is in place.
+6. Keep deployment compatible with free-tier hosting and database providers.
+7. Add PDF export from canonical invoice data.
+8. Add XRechnung XML generation and technical validation later.
+
+localStorage is prototype infrastructure only and should not be expanded as the
+final data layer.
+
 ## 1. Product vision
 
 RechnungsPilot DE is a compliance-first E-invoice workflow for German freelancers
