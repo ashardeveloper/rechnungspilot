@@ -1,5 +1,6 @@
 import { calculateInvoiceTotals } from "@/domain/invoice-calculations";
 import type { CanonicalInvoice, InvoiceLineItem } from "@/domain/invoice";
+import { validateInvoice } from "@/domain/invoice-validation";
 
 type InvoiceEditorProps = {
   invoice: CanonicalInvoice;
@@ -19,6 +20,7 @@ export function InvoiceEditor({
   onUpdateInvoice,
 }: InvoiceEditorProps) {
   const firstLineItem = invoice.lineItems[0];
+  const validationIssues = validateInvoice(invoice);
 
   function updateBuyer(field: keyof CanonicalInvoice["buyer"], value: string) {
     onUpdateInvoice({
@@ -49,6 +51,25 @@ export function InvoiceEditor({
             Lokale Bearbeitung der wichtigsten MVP-Felder. Beträge werden aus
             Positionen neu berechnet.
           </p>
+        </div>
+
+        <div className="border-b border-slate-200 px-5 py-4">
+          <h3 className="text-sm font-semibold text-slate-900">
+            Technische Prüfhinweise
+          </h3>
+          {validationIssues.length > 0 ? (
+            <ul className="mt-3 space-y-2">
+              {validationIssues.map((issue) => (
+                <li key={issue.field} className="text-sm text-amber-700">
+                  {issue.message}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-2 text-sm text-emerald-700">
+              Keine technischen Pflichtfeld-Hinweise für diese Demo-Prüfung.
+            </p>
+          )}
         </div>
 
         <div className="grid gap-6 px-5 py-5 lg:grid-cols-2">
