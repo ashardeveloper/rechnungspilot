@@ -5,9 +5,10 @@ import type { CanonicalInvoice } from "@/domain/invoice";
 import { getCurrentUserId } from "@/server/auth/current-user";
 import { seedDemoInvoices } from "@/server/demo/seed-demo-invoices";
 import {
+  createInvoiceForUser,
   deleteInvoicesForUser,
   listInvoicesForUser,
-  upsertInvoiceForUser,
+  updateInvoiceForUser,
 } from "@/server/invoices/invoice-repository";
 
 export async function listDemoInvoicesAction() {
@@ -30,7 +31,7 @@ export async function createDraftInvoiceAction() {
   const invoices = await listInvoicesForUser(userId);
   const draftInvoice = createDraftInvoice(invoices);
 
-  await upsertInvoiceForUser(userId, draftInvoice);
+  await createInvoiceForUser(userId, draftInvoice);
 
   return listInvoicesForUser(userId);
 }
@@ -38,7 +39,7 @@ export async function createDraftInvoiceAction() {
 export async function updateInvoiceAction(invoice: CanonicalInvoice) {
   const userId = await getCurrentUserId();
 
-  await upsertInvoiceForUser(userId, invoice);
+  await updateInvoiceForUser(userId, invoice);
 
   return listInvoicesForUser(userId);
 }

@@ -16,19 +16,58 @@ export async function listInvoicesForUser(userId: string) {
   return invoices.map(toCanonicalInvoice);
 }
 
+export async function createInvoiceForUser(
+  userId: string,
+  invoice: CanonicalInvoice,
+) {
+  const savedInvoice = await prisma.invoice.create({
+    data: toPrismaInvoiceCreateInput(userId, invoice),
+  });
+
+  return toCanonicalInvoice(savedInvoice);
+}
+
+export async function updateInvoiceForUser(
+  userId: string,
+  invoice: CanonicalInvoice,
+) {
+  const existingInvoice = await prisma.invoice.findFirst({
+    where: {
+      id: invoice.id,
+      userId,
+    },
+  });
+
+  if (!existingInvoice) {
+    throw new Error("Invoice not found.");
+  }
+
+  const savedInvoice = await prisma.invoice.update({
+    where: {
+      id: existingInvoice.id,
+    },
+    data: toPrismaInvoiceUpdateInput(invoice),
+  });
+
+  return toCanonicalInvoice(savedInvoice);
+}
+
 export async function upsertInvoiceForUser(
   userId: string,
   invoice: CanonicalInvoice,
 ) {
-  const savedInvoice = await prisma.invoice.upsert({
+  const existingInvoice = await prisma.invoice.findFirst({
     where: {
       id: invoice.id,
+      userId,
     },
-    create: toPrismaInvoiceCreateInput(userId, invoice),
-    update: toPrismaInvoiceUpdateInput(invoice),
   });
 
-  return toCanonicalInvoice(savedInvoice);
+  if (existingInvoice) {
+    return updateInvoiceForUser(userId, invoice);
+  }
+
+  return createInvoiceForUser(userId, invoice);
 }
 
 export async function deleteInvoicesForUser(userId: string) {
