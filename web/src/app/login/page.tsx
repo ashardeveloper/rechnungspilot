@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { signInWithPassword } from "@/app/actions/auth-actions";
 import { auth } from "@/server/auth/auth";
 import { demoUserEmail, demoUserPassword } from "@/server/demo/demo-user";
+import { SubmitButton } from "@/components/ui/submit-button";
 
 export default async function LoginPage({
   searchParams,
@@ -22,11 +23,9 @@ export default async function LoginPage({
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6 text-slate-950">
       <section className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6">
         <p className="text-sm font-medium text-cyan-700">RechnungsPilot DE</p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight">
-          Demo anmelden
-        </h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight">Anmelden</h1>
         <p className="mt-2 text-sm text-slate-600">
-          Lokaler SaaS-Demozugang mit datenbankgespeicherten Rechnungen.
+          Melde dich im RechnungsPilot Workspace an.
         </p>
 
         {hasCredentialError ? (
@@ -56,12 +55,7 @@ export default async function LoginPage({
             />
           </label>
 
-          <button
-            type="submit"
-            className="w-full rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white"
-          >
-            Einloggen
-          </button>
+          <SubmitButton>Einloggen</SubmitButton>
         </form>
       </section>
     </main>

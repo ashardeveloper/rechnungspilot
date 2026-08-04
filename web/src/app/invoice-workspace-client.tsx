@@ -140,7 +140,7 @@ export function InvoiceWorkspaceClient({
               disabled={isPending}
               className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 disabled:opacity-60"
             >
-              Demo zurücksetzen
+              {isPending ? "Wird gespeichert..." : "Beispieldaten zurücksetzen"}
             </button>
             <button
               type="button"
@@ -148,7 +148,7 @@ export function InvoiceWorkspaceClient({
               disabled={isPending}
               className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
             >
-              Neue Rechnung
+              {isPending ? "Wird erstellt..." : "Neue Rechnung"}
             </button>
           </div>
         </div>
