@@ -1,23 +1,13 @@
 import { redirect } from "next/navigation";
 
-import { listDemoInvoicesAction } from "@/app/actions/invoice-actions";
 import { auth } from "@/server/auth/auth";
 
-import { InvoiceWorkspaceClient } from "./invoice-workspace-client";
-
-export default async function Home() {
+export default async function HomePage() {
   const session = await auth();
 
-  if (!session?.user?.id) {
-    redirect("/login");
+  if (session?.user?.id) {
+    redirect("/invoices");
   }
 
-  const invoices = await listDemoInvoicesAction();
-
-  return (
-    <InvoiceWorkspaceClient
-      initialInvoices={invoices}
-      userEmail={session.user.email ?? "Angemeldeter Nutzer"}
-    />
-  );
+  redirect("/login");
 }
