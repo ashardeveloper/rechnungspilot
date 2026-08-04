@@ -9,7 +9,7 @@ export default defineConfig({
     },
   },
   test: {
-    include: ["src/**/*.test.ts"],
-    exclude: ["src/**/*.db.test.ts"],
+    include: ["src/**/*.db.test.ts"],
+    fileParallelism: false,
   },
 });
