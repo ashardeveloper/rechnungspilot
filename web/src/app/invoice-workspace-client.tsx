@@ -26,6 +26,11 @@ type WorkspaceAction =
     }
   | { type: "select_invoice"; invoiceId: string };
 
+type InvoiceWorkspaceClientProps = {
+  initialInvoices: CanonicalInvoice[];
+  userEmail: string;
+};
+
 const checks = [
   "Pflichtangaben nach Rechnungstyp erfassen",
   "PDF aus kanonischem Rechnungsmodell erzeugen",
@@ -55,9 +60,8 @@ function workspaceReducer(
 
 export function InvoiceWorkspaceClient({
   initialInvoices,
-}: {
-  initialInvoices: CanonicalInvoice[];
-}) {
+  userEmail,
+}: InvoiceWorkspaceClientProps) {
   const [isPending, startTransition] = useTransition();
   const [state, dispatch] = useReducer(workspaceReducer, {
     invoices: initialInvoices,
@@ -119,6 +123,7 @@ export function InvoiceWorkspaceClient({
             <h1 className="text-2xl font-semibold tracking-tight">
               Lokaler Rechnungsarbeitsplatz
             </h1>
+            <p className="mt-1 text-sm text-slate-600">{userEmail}</p>
           </div>
           <div className="flex gap-2">
             <form action={signOutCurrentUser}>

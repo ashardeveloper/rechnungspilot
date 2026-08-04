@@ -14,5 +14,10 @@ export default async function Home() {
 
   const invoices = await listDemoInvoicesAction();
 
-  return <InvoiceWorkspaceClient initialInvoices={invoices} />;
+  return (
+    <InvoiceWorkspaceClient
+      initialInvoices={invoices}
+      userEmail={session.user.email ?? "Angemeldeter Nutzer"}
+    />
+  );
 }
