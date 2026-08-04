@@ -2,7 +2,7 @@
 
 import { createDraftInvoice } from "@/domain/invoice-factory";
 import type { CanonicalInvoice } from "@/domain/invoice";
-import { demoUserId, ensureDemoUser } from "@/server/demo/demo-user";
+import { getCurrentUserId } from "@/server/auth/current-user";
 import { seedDemoInvoices } from "@/server/demo/seed-demo-invoices";
 import {
   deleteInvoicesForUser,
@@ -11,9 +11,9 @@ import {
 } from "@/server/invoices/invoice-repository";
 
 export async function listDemoInvoicesAction() {
-  await ensureDemoUser();
+  const userId = await getCurrentUserId();
 
-  const invoices = await listInvoicesForUser(demoUserId);
+  const invoices = await listInvoicesForUser(userId);
 
   if (invoices.length > 0) {
     return invoices;
@@ -21,31 +21,33 @@ export async function listDemoInvoicesAction() {
 
   await seedDemoInvoices();
 
-  return listInvoicesForUser(demoUserId);
+  return listInvoicesForUser(userId);
 }
 
 export async function createDraftInvoiceAction() {
-  await ensureDemoUser();
+  const userId = await getCurrentUserId();
 
-  const invoices = await listInvoicesForUser(demoUserId);
+  const invoices = await listInvoicesForUser(userId);
   const draftInvoice = createDraftInvoice(invoices);
 
-  await upsertInvoiceForUser(demoUserId, draftInvoice);
+  await upsertInvoiceForUser(userId, draftInvoice);
 
-  return listInvoicesForUser(demoUserId);
+  return listInvoicesForUser(userId);
 }
 
 export async function updateInvoiceAction(invoice: CanonicalInvoice) {
-  await ensureDemoUser();
-  await upsertInvoiceForUser(demoUserId, invoice);
+  const userId = await getCurrentUserId();
 
-  return listInvoicesForUser(demoUserId);
+  await upsertInvoiceForUser(userId, invoice);
+
+  return listInvoicesForUser(userId);
 }
 
 export async function resetDemoInvoicesAction() {
-  await ensureDemoUser();
-  await deleteInvoicesForUser(demoUserId);
+  const userId = await getCurrentUserId();
+
+  await deleteInvoicesForUser(userId);
   await seedDemoInvoices();
 
-  return listInvoicesForUser(demoUserId);
+  return listInvoicesForUser(userId);
 }
