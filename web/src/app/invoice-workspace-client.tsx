@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useReducer, useTransition } from "react";
+import { signOutCurrentUser } from "@/app/actions/auth-actions";
 
 import {
   createDraftInvoiceAction,
@@ -120,6 +121,14 @@ export function InvoiceWorkspaceClient({
             </h1>
           </div>
           <div className="flex gap-2">
+            <form action={signOutCurrentUser}>
+              <button
+                type="submit"
+                className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700"
+              >
+                Abmelden
+              </button>
+            </form>
             <button
               type="button"
               onClick={resetDemoData}

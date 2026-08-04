@@ -1,9 +1,11 @@
-import { demoUserId, ensureDemoUser } from "@/server/demo/demo-user";
+import { auth } from "@/server/auth/auth";
 
 export async function getCurrentUserId() {
-  const user = await ensureDemoUser();
+  const session = await auth();
 
-  return user.id;
+  if (!session?.user?.id) {
+    throw new Error("Authentication required.");
+  }
+
+  return session.user.id;
 }
-
-export { demoUserId };
