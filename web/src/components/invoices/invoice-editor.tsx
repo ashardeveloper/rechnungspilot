@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { calculateInvoiceTotals } from "@/domain/invoice-calculations";
-import type { CanonicalInvoice, InvoiceLineItem } from "@/domain/invoice";
+import type { CanonicalInvoice } from "@/domain/invoice";
 import { validateInvoice } from "@/domain/invoice-validation";
 import { customerToInvoiceParty, type Customer } from "@/domain/customer";
 
@@ -75,16 +75,6 @@ export function InvoiceEditor({
         ...invoice.buyer,
         [field]: value,
       },
-    });
-  }
-
-  function updateFirstLineItem(updatedLineItem: InvoiceLineItem) {
-    const lineItems = [updatedLineItem, ...invoice.lineItems.slice(1)];
-
-    onUpdateInvoice({
-      ...invoice,
-      lineItems,
-      totals: calculateInvoiceTotals(lineItems),
     });
   }
 
@@ -228,60 +218,186 @@ export function InvoiceEditor({
 
           {firstLineItem ? (
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-slate-900">
-                Erste Position
-              </h3>
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-sm font-semibold text-slate-900">
+                  Positionen
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const lineItems = [
+                      ...invoice.lineItems,
+                      {
+                        description: "Neue Leistung",
+                        quantity: 1,
+                        unit: "hour" as const,
+                        unitPriceCents: 10000,
+                        vatCategory: "standard" as const,
+                        vatRatePercent: 19 as const,
+                      },
+                    ];
 
-              <label className="block">
-                <span className="text-sm text-slate-600">Beschreibung</span>
-                <input
-                  value={firstLineItem.description}
-                  onChange={(event) =>
-                    updateFirstLineItem({
-                      ...firstLineItem,
-                      description: event.target.value,
-                    })
-                  }
-                  className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                />
-              </label>
+                    onUpdateInvoice({
+                      ...invoice,
+                      lineItems,
+                      totals: calculateInvoiceTotals(lineItems),
+                    });
+                  }}
+                  className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700"
+                >
+                  Position hinzufügen
+                </button>
+              </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label className="block">
-                  <span className="text-sm text-slate-600">Menge</span>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.25"
-                    value={firstLineItem.quantity}
-                    onChange={(event) =>
-                      updateFirstLineItem({
-                        ...firstLineItem,
-                        quantity: Number.parseFloat(event.target.value || "0"),
-                      })
-                    }
-                    className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                  />
-                </label>
+              <div className="space-y-4">
+                {invoice.lineItems.map((lineItem, index) => (
+                  <div
+                    key={index}
+                    className="rounded-md border border-slate-200 p-3"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-medium text-slate-900">
+                        Position {index + 1}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const lineItems = invoice.lineItems.filter(
+                            (_, itemIndex) => itemIndex !== index,
+                          );
 
-                <label className="block">
-                  <span className="text-sm text-slate-600">
-                    Einzelpreis EUR
-                  </span>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={centsToEuroInput(firstLineItem.unitPriceCents)}
-                    onChange={(event) =>
-                      updateFirstLineItem({
-                        ...firstLineItem,
-                        unitPriceCents: euroInputToCents(event.target.value),
-                      })
-                    }
-                    className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                  />
-                </label>
+                          onUpdateInvoice({
+                            ...invoice,
+                            lineItems,
+                            totals: calculateInvoiceTotals(lineItems),
+                          });
+                        }}
+                        disabled={invoice.lineItems.length === 1}
+                        className="text-sm font-medium text-red-700 disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        Entfernen
+                      </button>
+                    </div>
+
+                    <label className="mt-3 block">
+                      <span className="text-sm text-slate-600">
+                        Beschreibung
+                      </span>
+                      <input
+                        value={lineItem.description}
+                        onChange={(event) => {
+                          const lineItems = invoice.lineItems.map(
+                            (item, itemIndex) =>
+                              itemIndex === index
+                                ? { ...item, description: event.target.value }
+                                : item,
+                          );
+
+                          onUpdateInvoice({
+                            ...invoice,
+                            lineItems,
+                            totals: calculateInvoiceTotals(lineItems),
+                          });
+                        }}
+                        className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                      />
+                    </label>
+
+                    <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                      <label className="block">
+                        <span className="text-sm text-slate-600">Menge</span>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.25"
+                          value={lineItem.quantity}
+                          onChange={(event) => {
+                            const lineItems = invoice.lineItems.map(
+                              (item, itemIndex) =>
+                                itemIndex === index
+                                  ? {
+                                      ...item,
+                                      quantity: Number.parseFloat(
+                                        event.target.value || "0",
+                                      ),
+                                    }
+                                  : item,
+                            );
+
+                            onUpdateInvoice({
+                              ...invoice,
+                              lineItems,
+                              totals: calculateInvoiceTotals(lineItems),
+                            });
+                          }}
+                          className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                        />
+                      </label>
+
+                      <label className="block">
+                        <span className="text-sm text-slate-600">Einheit</span>
+                        <select
+                          value={lineItem.unit}
+                          onChange={(event) => {
+                            const lineItems = invoice.lineItems.map(
+                              (item, itemIndex) =>
+                                itemIndex === index
+                                  ? {
+                                      ...item,
+                                      unit: event.target
+                                        .value as typeof item.unit,
+                                    }
+                                  : item,
+                            );
+
+                            onUpdateInvoice({
+                              ...invoice,
+                              lineItems,
+                              totals: calculateInvoiceTotals(lineItems),
+                            });
+                          }}
+                          className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                        >
+                          <option value="hour">Std.</option>
+                          <option value="day">Tag</option>
+                          <option value="piece">Stück</option>
+                        </select>
+                      </label>
+
+                      <label className="block">
+                        <span className="text-sm text-slate-600">
+                          Einzelpreis EUR
+                        </span>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={centsToEuroInput(lineItem.unitPriceCents)}
+                          onChange={(event) => {
+                            const lineItems = invoice.lineItems.map(
+                              (item, itemIndex) =>
+                                itemIndex === index
+                                  ? {
+                                      ...item,
+                                      unitPriceCents: euroInputToCents(
+                                        event.target.value,
+                                      ),
+                                    }
+                                  : item,
+                            );
+
+                            onUpdateInvoice({
+                              ...invoice,
+                              lineItems,
+                              totals: calculateInvoiceTotals(lineItems),
+                            });
+                          }}
+                          className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           ) : null}
