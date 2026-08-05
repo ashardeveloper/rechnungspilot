@@ -6,6 +6,7 @@ import { listCustomersForUser } from "@/server/customers/customer-repository";
 import { seedDemoCustomers } from "@/server/demo/seed-demo-customers";
 import type { Customer } from "@/domain/customer";
 import { upsertCustomerForUser } from "@/server/customers/customer-repository";
+import { updateCustomerForUser } from "@/server/customers/customer-repository";
 
 export async function listCustomersAction() {
   const userId = await getCurrentUserId();
@@ -36,6 +37,24 @@ export async function createCustomerAction(formData: FormData) {
   };
 
   await upsertCustomerForUser(userId, customer);
+  revalidatePath("/customers");
+  revalidatePath("/invoices");
+}
+
+export async function updateCustomerAction(formData: FormData) {
+  const userId = await getCurrentUserId();
+
+  await updateCustomerForUser(userId, {
+    id: String(formData.get("id") ?? ""),
+    name: String(formData.get("name") ?? "").trim(),
+    street: String(formData.get("street") ?? "").trim(),
+    postalCode: String(formData.get("postalCode") ?? "").trim(),
+    city: String(formData.get("city") ?? "").trim(),
+    countryCode: "DE",
+    vatId: String(formData.get("vatId") ?? "").trim() || undefined,
+    taxNumber: String(formData.get("taxNumber") ?? "").trim() || undefined,
+  });
+
   revalidatePath("/customers");
   revalidatePath("/invoices");
 }
