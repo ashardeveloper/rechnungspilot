@@ -10,6 +10,7 @@ import {
   listInvoicesForUser,
   updateInvoiceForUser,
 } from "@/server/invoices/invoice-repository";
+import { reserveNextInvoiceNumber } from "@/server/settings/invoice-number-settings-repository";
 
 export async function listDemoInvoicesAction() {
   const userId = await getCurrentUserId();
@@ -29,7 +30,8 @@ export async function createDraftInvoiceAction() {
   const userId = await getCurrentUserId();
 
   const invoices = await listInvoicesForUser(userId);
-  const draftInvoice = createDraftInvoice(invoices);
+  const invoiceNumber = await reserveNextInvoiceNumber(userId);
+  const draftInvoice = createDraftInvoice(invoices, invoiceNumber);
 
   await createInvoiceForUser(userId, draftInvoice);
 

@@ -27,6 +27,7 @@ function formatIsoDate(date: Date) {
 
 export function createDraftInvoice(
   invoices: CanonicalInvoice[],
+  invoiceNumber?: string,
 ): CanonicalInvoice {
   const today = new Date();
   const lineItems: InvoiceLineItem[] = [
@@ -42,7 +43,9 @@ export function createDraftInvoice(
 
   return {
     id: `inv_${crypto.randomUUID()}`,
-    number: `RP-2026-${padInvoiceSequence(getNextInvoiceSequence(invoices))}`,
+    number:
+      invoiceNumber ??
+      `RP-2026-${padInvoiceSequence(getNextInvoiceSequence(invoices))}`,
     status: "draft",
     issueDate: formatIsoDate(today),
     dueDate: formatIsoDate(addDays(today, 14)),

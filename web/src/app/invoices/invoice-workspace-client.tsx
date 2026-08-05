@@ -162,6 +162,12 @@ export function InvoiceWorkspaceClient({
             >
               Kunden
             </Link>
+            <Link
+              href="/settings"
+              className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700"
+            >
+              Einstellungen
+            </Link>
             <form action={signOutCurrentUser}>
               <button
                 type="submit"
