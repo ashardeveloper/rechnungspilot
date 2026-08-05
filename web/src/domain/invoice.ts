@@ -1,4 +1,4 @@
-export type InvoiceStatus = "draft" | "review_ready" | "paid";
+export type InvoiceStatus = "draft" | "review_ready" | "issued" | "paid";
 
 export type GermanVatCategory = "standard" | "reduced" | "exempt";
 

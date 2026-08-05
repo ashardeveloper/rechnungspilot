@@ -42,4 +42,32 @@ describe("invoice lifecycle", () => {
       blockedReason: "Rechnung ist bereits ein Entwurf.",
     });
   });
+
+  it("requires review-ready status before issuing", () => {
+    const invoice = sampleInvoices[0];
+
+    expect(canTransitionInvoiceToStatus(invoice, "issued")).toBe(false);
+
+    const reviewReadyInvoice = {
+      ...invoice,
+      status: "review_ready" as const,
+    };
+
+    expect(canTransitionInvoiceToStatus(reviewReadyInvoice, "issued")).toBe(
+      true,
+    );
+  });
+
+  it("requires issued status before paid", () => {
+    const invoice = sampleInvoices[0];
+
+    expect(canTransitionInvoiceToStatus(invoice, "paid")).toBe(false);
+
+    const issuedInvoice = {
+      ...invoice,
+      status: "issued" as const,
+    };
+
+    expect(canTransitionInvoiceToStatus(issuedInvoice, "paid")).toBe(true);
+  });
 });

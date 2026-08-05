@@ -94,6 +94,8 @@ export function InvoiceWorkspaceClient({
       ).length,
       paid: state.invoices.filter((invoice) => invoice.status === "paid")
         .length,
+      issued: state.invoices.filter((invoice) => invoice.status === "issued")
+        .length,
     }),
     [state.invoices],
   );
@@ -197,7 +199,7 @@ export function InvoiceWorkspaceClient({
       </section>
 
       <section className="border-b border-slate-200 bg-white print:hidden">
-        <div className="mx-auto grid max-w-6xl gap-4 px-6 py-5 sm:grid-cols-4">
+        <div className="mx-auto grid max-w-6xl gap-4 px-6 py-5 sm:grid-cols-5">
           <div>
             <p className="text-sm text-slate-600">Gesamt</p>
             <p className="mt-1 text-2xl font-semibold">{invoiceStats.total}</p>
@@ -211,6 +213,10 @@ export function InvoiceWorkspaceClient({
             <p className="mt-1 text-2xl font-semibold">
               {invoiceStats.reviewReady}
             </p>
+          </div>
+          <div>
+            <p className="text-sm text-slate-600">Ausgestellt</p>
+            <p className="mt-1 text-2xl font-semibold">{invoiceStats.issued}</p>
           </div>
           <div>
             <p className="text-sm text-slate-600">Bezahlt</p>
@@ -248,46 +254,25 @@ export function InvoiceWorkspaceClient({
         </aside>
       </section>
 
-      {selectedInvoice ? (
-        <section className="mx-auto max-w-6xl px-6 pb-8 print:hidden">
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-5 py-4">
-            <div>
-              <h2 className="text-lg font-semibold">Statussteuerung</h2>
-              <p className="mt-1 text-sm text-slate-600">
-                Statuswechsel bleiben technisch begrenzt und basieren auf der
-                aktuellen Validierung.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {getInvoiceStatusTransitions(selectedInvoice).map(
-                (transition) => (
-                  <button
-                    key={transition.targetStatus}
-                    type="button"
-                    onClick={() => updateInvoiceStatus(transition.targetStatus)}
-                    disabled={isPending || Boolean(transition.blockedReason)}
-                    title={transition.blockedReason}
-                    className={
-                      transition.targetStatus === "paid"
-                        ? "rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
-                        : "rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
-                    }
-                  >
-                    {transition.label}
-                  </button>
-                ),
-              )}
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      {selectedInvoice ? (
+      {selectedInvoice &&
+      selectedInvoice.status !== "issued" &&
+      selectedInvoice.status !== "paid" ? (
         <InvoiceEditor
           invoice={selectedInvoice}
           customers={customers}
           onUpdateInvoice={updateInvoice}
         />
+      ) : selectedInvoice ? (
+        <section className="mx-auto max-w-6xl px-6 pb-8 print:hidden">
+          <div className="rounded-lg border border-slate-200 bg-white px-5 py-4">
+            <h2 className="text-lg font-semibold">Rechnung gesperrt</h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Ausgestellte oder bezahlte Rechnungen sind in dieser Demo nicht
+              mehr direkt bearbeitbar. Korrekturen werden später als eigener
+              Workflow modelliert.
+            </p>
+          </div>
+        </section>
       ) : null}
 
       {selectedInvoice ? <InvoicePreview invoice={selectedInvoice} /> : null}
