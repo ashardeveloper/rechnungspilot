@@ -16,6 +16,7 @@ import {
   getInvoiceStatusTransitions,
   transitionInvoiceStatus,
 } from "@/domain/invoice-lifecycle";
+import type { Customer } from "@/domain/customer";
 
 type WorkspaceState = {
   invoices: CanonicalInvoice[];
@@ -32,6 +33,7 @@ type WorkspaceAction =
 
 type InvoiceWorkspaceClientProps = {
   initialInvoices: CanonicalInvoice[];
+  customers: Customer[];
   userEmail: string;
 };
 
@@ -64,6 +66,7 @@ function workspaceReducer(
 
 export function InvoiceWorkspaceClient({
   initialInvoices,
+  customers,
   userEmail,
 }: InvoiceWorkspaceClientProps) {
   const [isPending, startTransition] = useTransition();
@@ -269,6 +272,7 @@ export function InvoiceWorkspaceClient({
       {selectedInvoice ? (
         <InvoiceEditor
           invoice={selectedInvoice}
+          customers={customers}
           onUpdateInvoice={updateInvoice}
         />
       ) : null}

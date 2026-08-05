@@ -8,8 +8,8 @@ datasource db {
 }
 
 model User {
-  id            String    @id
-  email         String    @unique
+  id            String     @id
+  email         String     @unique
   name          String?
   passwordHash  String?
   emailVerified DateTime?
@@ -17,8 +17,9 @@ model User {
   accounts      Account[]
   sessions      Session[]
   invoices      Invoice[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  customers     Customer[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
 
 model Account {
@@ -58,6 +59,25 @@ model VerificationToken {
   expires    DateTime
 
   @@id([identifier, token])
+}
+
+model Customer {
+  id          String   @id
+  userId      String
+  name        String
+  street      String
+  postalCode  String
+  city        String
+  countryCode String
+  vatId       String?
+  taxNumber   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([name])
 }
 
 model Invoice {

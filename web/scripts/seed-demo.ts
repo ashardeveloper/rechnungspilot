@@ -6,8 +6,11 @@ async function main() {
 
   const invoiceCount = await prisma.invoice.count();
   const userCount = await prisma.user.count();
+  const customerCount = await prisma.customer.count();
 
-  console.log(`Seeded ${userCount} user(s) and ${invoiceCount} invoice(s).`);
+  console.log(
+    `Seeded ${userCount} user(s), ${customerCount} customer(s), and ${invoiceCount} invoice(s).`,
+  );
 }
 
 main()

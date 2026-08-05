@@ -4,6 +4,7 @@ import { listDemoInvoicesAction } from "@/app/actions/invoice-actions";
 import { auth } from "@/server/auth/auth";
 
 import { InvoiceWorkspaceClient } from "./invoice-workspace-client";
+import { listCustomersAction } from "@/app/actions/customer-actions";
 
 export default async function InvoicesPage() {
   const session = await auth();
@@ -12,11 +13,15 @@ export default async function InvoicesPage() {
     redirect("/login");
   }
 
-  const invoices = await listDemoInvoicesAction();
+  const [invoices, customers] = await Promise.all([
+    listDemoInvoicesAction(),
+    listCustomersAction(),
+  ]);
 
   return (
     <InvoiceWorkspaceClient
       initialInvoices={invoices}
+      customers={customers}
       userEmail={session.user.email ?? "Angemeldeter Nutzer"}
     />
   );
