@@ -76,6 +76,20 @@ export function InvoiceWorkspaceClient({
     [state.invoices, state.selectedInvoiceId],
   );
 
+  const invoiceStats = useMemo(
+    () => ({
+      total: state.invoices.length,
+      drafts: state.invoices.filter((invoice) => invoice.status === "draft")
+        .length,
+      reviewReady: state.invoices.filter(
+        (invoice) => invoice.status === "review_ready",
+      ).length,
+      paid: state.invoices.filter((invoice) => invoice.status === "paid")
+        .length,
+    }),
+    [state.invoices],
+  );
+
   function createDraftInvoice() {
     startTransition(async () => {
       const invoices = await createDraftInvoiceAction();
@@ -150,6 +164,29 @@ export function InvoiceWorkspaceClient({
             >
               {isPending ? "Wird erstellt..." : "Neue Rechnung"}
             </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-slate-200 bg-white print:hidden">
+        <div className="mx-auto grid max-w-6xl gap-4 px-6 py-5 sm:grid-cols-4">
+          <div>
+            <p className="text-sm text-slate-600">Gesamt</p>
+            <p className="mt-1 text-2xl font-semibold">{invoiceStats.total}</p>
+          </div>
+          <div>
+            <p className="text-sm text-slate-600">Entwürfe</p>
+            <p className="mt-1 text-2xl font-semibold">{invoiceStats.drafts}</p>
+          </div>
+          <div>
+            <p className="text-sm text-slate-600">Prüfbereit</p>
+            <p className="mt-1 text-2xl font-semibold">
+              {invoiceStats.reviewReady}
+            </p>
+          </div>
+          <div>
+            <p className="text-sm text-slate-600">Bezahlt</p>
+            <p className="mt-1 text-2xl font-semibold">{invoiceStats.paid}</p>
           </div>
         </div>
       </section>
