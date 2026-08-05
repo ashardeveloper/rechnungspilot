@@ -32,20 +32,61 @@ export async function listCustomersForUser(userId: string) {
   return customers.map(toCustomer);
 }
 
+export async function createCustomerForUser(
+  userId: string,
+  customer: Customer,
+) {
+  const savedCustomer = await prisma.customer.create({
+    data: {
+      ...customer,
+      userId,
+    },
+  });
+
+  return toCustomer(savedCustomer);
+}
+
+export async function updateCustomerForUser(
+  userId: string,
+  customer: Customer,
+) {
+  const existingCustomer = await prisma.customer.findFirst({
+    where: {
+      id: customer.id,
+      userId,
+    },
+  });
+
+  if (!existingCustomer) {
+    throw new Error("Customer not found.");
+  }
+
+  const savedCustomer = await prisma.customer.update({
+    where: {
+      id: existingCustomer.id,
+    },
+    data: customer,
+  });
+
+  return toCustomer(savedCustomer);
+}
+
 export async function upsertCustomerForUser(
   userId: string,
   customer: Customer,
 ) {
-  const savedCustomer = await prisma.customer.upsert({
-    where: { id: customer.id },
-    create: {
-      ...customer,
+  const existingCustomer = await prisma.customer.findFirst({
+    where: {
+      id: customer.id,
       userId,
     },
-    update: customer,
   });
 
-  return toCustomer(savedCustomer);
+  if (existingCustomer) {
+    return updateCustomerForUser(userId, customer);
+  }
+
+  return createCustomerForUser(userId, customer);
 }
 
 export async function deleteCustomersForUser(userId: string) {
