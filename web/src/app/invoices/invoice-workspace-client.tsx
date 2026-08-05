@@ -12,7 +12,10 @@ import { InvoiceEditor } from "@/components/invoices/invoice-editor";
 import { InvoiceList } from "@/components/invoices/invoice-list";
 import { InvoicePreview } from "@/components/invoices/invoice-preview";
 import type { CanonicalInvoice } from "@/domain/invoice";
-import { validateInvoice } from "@/domain/invoice-validation";
+import {
+  getInvoiceStatusTransitions,
+  transitionInvoiceStatus,
+} from "@/domain/invoice-lifecycle";
 
 type WorkspaceState = {
   invoices: CanonicalInvoice[];
@@ -91,10 +94,6 @@ export function InvoiceWorkspaceClient({
     [state.invoices],
   );
 
-  const selectedInvoiceIssues = selectedInvoice
-    ? validateInvoice(selectedInvoice)
-    : [];
-
   function createDraftInvoice() {
     startTransition(async () => {
       const invoices = await createDraftInvoiceAction();
@@ -124,14 +123,7 @@ export function InvoiceWorkspaceClient({
       return;
     }
 
-    if (status === "review_ready" && selectedInvoiceIssues.length > 0) {
-      return;
-    }
-
-    updateInvoice({
-      ...selectedInvoice,
-      status,
-    });
+    updateInvoice(transitionInvoiceStatus(selectedInvoice, status));
   }
 
   function resetDemoData() {
@@ -251,34 +243,24 @@ export function InvoiceWorkspaceClient({
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => updateInvoiceStatus("draft")}
-                disabled={isPending || selectedInvoice.status === "draft"}
-                className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Als Entwurf markieren
-              </button>
-              <button
-                type="button"
-                onClick={() => updateInvoiceStatus("review_ready")}
-                disabled={
-                  isPending ||
-                  selectedInvoice.status === "review_ready" ||
-                  selectedInvoiceIssues.length > 0
-                }
-                className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Als prüfbereit markieren
-              </button>
-              <button
-                type="button"
-                onClick={() => updateInvoiceStatus("paid")}
-                disabled={isPending || selectedInvoice.status === "paid"}
-                className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Als bezahlt markieren
-              </button>
+              {getInvoiceStatusTransitions(selectedInvoice).map(
+                (transition) => (
+                  <button
+                    key={transition.targetStatus}
+                    type="button"
+                    onClick={() => updateInvoiceStatus(transition.targetStatus)}
+                    disabled={isPending || Boolean(transition.blockedReason)}
+                    title={transition.blockedReason}
+                    className={
+                      transition.targetStatus === "paid"
+                        ? "rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+                        : "rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    }
+                  >
+                    {transition.label}
+                  </button>
+                ),
+              )}
             </div>
           </div>
         </section>
