@@ -17,6 +17,7 @@ import {
   transitionInvoiceStatus,
 } from "@/domain/invoice-lifecycle";
 import type { Customer } from "@/domain/customer";
+import Link from "next/link";
 
 type WorkspaceState = {
   invoices: CanonicalInvoice[];
@@ -155,6 +156,12 @@ export function InvoiceWorkspaceClient({
             <p className="mt-1 text-sm text-slate-600">{userEmail}</p>
           </div>
           <div className="flex gap-2">
+            <Link
+              href="/customers"
+              className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700"
+            >
+              Kunden
+            </Link>
             <form action={signOutCurrentUser}>
               <button
                 type="submit"
