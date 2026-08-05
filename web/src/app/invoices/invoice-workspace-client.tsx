@@ -254,6 +254,41 @@ export function InvoiceWorkspaceClient({
         </aside>
       </section>
 
+      {selectedInvoice ? (
+        <section className="mx-auto max-w-6xl px-6 pb-8 print:hidden">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-5 py-4">
+            <div>
+              <h2 className="text-lg font-semibold">Rechnungsstatus</h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Der Status steuert, ob eine Rechnung noch bearbeitet,
+                ausgestellt oder abgeschlossen ist.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {getInvoiceStatusTransitions(selectedInvoice).map(
+                (transition) => (
+                  <button
+                    key={transition.targetStatus}
+                    type="button"
+                    onClick={() => updateInvoiceStatus(transition.targetStatus)}
+                    disabled={isPending || Boolean(transition.blockedReason)}
+                    title={transition.blockedReason}
+                    className={
+                      transition.targetStatus === "paid"
+                        ? "rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+                        : "rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    }
+                  >
+                    {transition.label}
+                  </button>
+                ),
+              )}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       {selectedInvoice &&
       selectedInvoice.status !== "issued" &&
       selectedInvoice.status !== "paid" ? (
