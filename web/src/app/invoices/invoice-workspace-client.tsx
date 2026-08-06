@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useReducer, useTransition } from "react";
+import { useEffect, useMemo, useReducer, useState, useTransition } from "react";
 import { signOutCurrentUser } from "@/app/actions/auth-actions";
 
 import {
@@ -18,6 +18,8 @@ import {
 } from "@/domain/invoice-lifecycle";
 import type { Customer } from "@/domain/customer";
 import Link from "next/link";
+import { listInvoiceAuditEventsAction } from "@/app/actions/invoice-audit-actions";
+import type { InvoiceAuditEvent } from "@/domain/invoice-audit";
 
 type WorkspaceState = {
   invoices: CanonicalInvoice[];
@@ -71,6 +73,7 @@ export function InvoiceWorkspaceClient({
   userEmail,
 }: InvoiceWorkspaceClientProps) {
   const [isPending, startTransition] = useTransition();
+  const [auditEvents, setAuditEvents] = useState<InvoiceAuditEvent[]>([]);
   const [state, dispatch] = useReducer(workspaceReducer, {
     invoices: initialInvoices,
     selectedInvoiceId: initialInvoices[0]?.id ?? "",
@@ -83,6 +86,26 @@ export function InvoiceWorkspaceClient({
       ) ?? state.invoices[0],
     [state.invoices, state.selectedInvoiceId],
   );
+
+  useEffect(() => {
+    if (!selectedInvoice) {
+      return;
+    }
+
+    let isCurrent = true;
+
+    startTransition(async () => {
+      const events = await listInvoiceAuditEventsAction(selectedInvoice.id);
+
+      if (isCurrent) {
+        setAuditEvents(events);
+      }
+    });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [selectedInvoice]);
 
   const invoiceStats = useMemo(
     () => ({
@@ -293,9 +316,10 @@ export function InvoiceWorkspaceClient({
       selectedInvoice.status !== "issued" &&
       selectedInvoice.status !== "paid" ? (
         <InvoiceEditor
+          key={selectedInvoice.id}
           invoice={selectedInvoice}
           customers={customers}
-          onUpdateInvoice={updateInvoice}
+          onSaveInvoice={updateInvoice}
         />
       ) : selectedInvoice ? (
         <section className="mx-auto max-w-6xl px-6 pb-8 print:hidden">
@@ -311,6 +335,40 @@ export function InvoiceWorkspaceClient({
       ) : null}
 
       {selectedInvoice ? <InvoicePreview invoice={selectedInvoice} /> : null}
+      {selectedInvoice ? (
+        <section className="mx-auto max-w-6xl px-6 pb-10 print:hidden">
+          <div className="rounded-lg border border-slate-200 bg-white">
+            <div className="border-b border-slate-200 px-5 py-4">
+              <h2 className="text-lg font-semibold">Audit-Timeline</h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Technische Historie der ausgewählten Rechnung.
+              </p>
+            </div>
+
+            <div className="divide-y divide-slate-200">
+              {auditEvents.length > 0 ? (
+                auditEvents.map((event) => (
+                  <div key={event.id} className="px-5 py-4 text-sm">
+                    <p className="font-medium text-slate-950">
+                      {event.message}
+                    </p>
+                    <p className="mt-1 text-slate-500">
+                      {new Intl.DateTimeFormat("de-DE", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      }).format(new Date(event.createdAt))}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <div className="px-5 py-4 text-sm text-slate-600">
+                  Noch keine Audit-Ereignisse für diese Rechnung.
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      ) : null}
     </main>
   );
 }

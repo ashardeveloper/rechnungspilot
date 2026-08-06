@@ -1,15 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import { calculateInvoiceTotals } from "@/domain/invoice-calculations";
 import type { CanonicalInvoice } from "@/domain/invoice";
 import { validateInvoice } from "@/domain/invoice-validation";
 import { customerToInvoiceParty, type Customer } from "@/domain/customer";
+import { useEffect, useMemo, useState } from "react";
 
 type InvoiceEditorProps = {
   invoice: CanonicalInvoice;
   customers: Customer[];
-  onUpdateInvoice: (invoice: CanonicalInvoice) => void;
+  onSaveInvoice: (invoice: CanonicalInvoice) => void;
 };
 
 function centsToEuroInput(cents: number) {
@@ -23,16 +23,18 @@ function euroInputToCents(value: string) {
 export function InvoiceEditor({
   invoice,
   customers,
-  onUpdateInvoice,
+  onSaveInvoice,
 }: InvoiceEditorProps) {
-  const firstLineItem = invoice.lineItems[0];
-  const validationIssues = validateInvoice(invoice);
+  const [draftInvoice, setDraftInvoice] = useState(invoice);
+
+  const firstLineItem = draftInvoice.lineItems[0];
+  const validationIssues = validateInvoice(draftInvoice);
 
   const [customerQuery, setCustomerQuery] = useState("");
   const [isCustomerPickerOpen, setIsCustomerPickerOpen] = useState(false);
 
   const selectedCustomer = customers.find(
-    (customer) => customer.name === invoice.buyer.name,
+    (customer) => customer.name === draftInvoice.buyer.name,
   );
 
   const filteredCustomers = useMemo(() => {
@@ -62,17 +64,17 @@ export function InvoiceEditor({
     setCustomerQuery("");
     setIsCustomerPickerOpen(false);
 
-    onUpdateInvoice({
-      ...invoice,
+    setDraftInvoice({
+      ...draftInvoice,
       buyer: customerToInvoiceParty(customer),
     });
   }
 
   function updateBuyer(field: keyof CanonicalInvoice["buyer"], value: string) {
-    onUpdateInvoice({
-      ...invoice,
+    setDraftInvoice({
+      ...draftInvoice,
       buyer: {
-        ...invoice.buyer,
+        ...draftInvoice.buyer,
         [field]: value,
       },
     });
@@ -178,7 +180,7 @@ export function InvoiceEditor({
             <label className="block">
               <span className="text-sm text-slate-600">Name</span>
               <input
-                value={invoice.buyer.name}
+                value={draftInvoice.buyer.name}
                 onChange={(event) => updateBuyer("name", event.target.value)}
                 className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
               />
@@ -187,7 +189,7 @@ export function InvoiceEditor({
             <label className="block">
               <span className="text-sm text-slate-600">Straße</span>
               <input
-                value={invoice.buyer.street}
+                value={draftInvoice.buyer.street}
                 onChange={(event) => updateBuyer("street", event.target.value)}
                 className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
               />
@@ -197,7 +199,7 @@ export function InvoiceEditor({
               <label className="block">
                 <span className="text-sm text-slate-600">PLZ</span>
                 <input
-                  value={invoice.buyer.postalCode}
+                  value={draftInvoice.buyer.postalCode}
                   onChange={(event) =>
                     updateBuyer("postalCode", event.target.value)
                   }
@@ -208,7 +210,7 @@ export function InvoiceEditor({
               <label className="block">
                 <span className="text-sm text-slate-600">Ort</span>
                 <input
-                  value={invoice.buyer.city}
+                  value={draftInvoice.buyer.city}
                   onChange={(event) => updateBuyer("city", event.target.value)}
                   className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
                 />
@@ -226,7 +228,7 @@ export function InvoiceEditor({
                   type="button"
                   onClick={() => {
                     const lineItems = [
-                      ...invoice.lineItems,
+                      ...draftInvoice.lineItems,
                       {
                         description: "Neue Leistung",
                         quantity: 1,
@@ -237,8 +239,8 @@ export function InvoiceEditor({
                       },
                     ];
 
-                    onUpdateInvoice({
-                      ...invoice,
+                    setDraftInvoice({
+                      ...draftInvoice,
                       lineItems,
                       totals: calculateInvoiceTotals(lineItems),
                     });
@@ -250,7 +252,7 @@ export function InvoiceEditor({
               </div>
 
               <div className="space-y-4">
-                {invoice.lineItems.map((lineItem, index) => (
+                {draftInvoice.lineItems.map((lineItem, index) => (
                   <div
                     key={index}
                     className="rounded-md border border-slate-200 p-3"
@@ -262,17 +264,17 @@ export function InvoiceEditor({
                       <button
                         type="button"
                         onClick={() => {
-                          const lineItems = invoice.lineItems.filter(
+                          const lineItems = draftInvoice.lineItems.filter(
                             (_, itemIndex) => itemIndex !== index,
                           );
 
-                          onUpdateInvoice({
-                            ...invoice,
+                          setDraftInvoice({
+                            ...draftInvoice,
                             lineItems,
                             totals: calculateInvoiceTotals(lineItems),
                           });
                         }}
-                        disabled={invoice.lineItems.length === 1}
+                        disabled={draftInvoice.lineItems.length === 1}
                         className="text-sm font-medium text-red-700 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         Entfernen
@@ -286,15 +288,15 @@ export function InvoiceEditor({
                       <input
                         value={lineItem.description}
                         onChange={(event) => {
-                          const lineItems = invoice.lineItems.map(
+                          const lineItems = draftInvoice.lineItems.map(
                             (item, itemIndex) =>
                               itemIndex === index
                                 ? { ...item, description: event.target.value }
                                 : item,
                           );
 
-                          onUpdateInvoice({
-                            ...invoice,
+                          setDraftInvoice({
+                            ...draftInvoice,
                             lineItems,
                             totals: calculateInvoiceTotals(lineItems),
                           });
@@ -312,7 +314,7 @@ export function InvoiceEditor({
                           step="0.25"
                           value={lineItem.quantity}
                           onChange={(event) => {
-                            const lineItems = invoice.lineItems.map(
+                            const lineItems = draftInvoice.lineItems.map(
                               (item, itemIndex) =>
                                 itemIndex === index
                                   ? {
@@ -324,8 +326,8 @@ export function InvoiceEditor({
                                   : item,
                             );
 
-                            onUpdateInvoice({
-                              ...invoice,
+                            setDraftInvoice({
+                              ...draftInvoice,
                               lineItems,
                               totals: calculateInvoiceTotals(lineItems),
                             });
@@ -339,7 +341,7 @@ export function InvoiceEditor({
                         <select
                           value={lineItem.unit}
                           onChange={(event) => {
-                            const lineItems = invoice.lineItems.map(
+                            const lineItems = draftInvoice.lineItems.map(
                               (item, itemIndex) =>
                                 itemIndex === index
                                   ? {
@@ -350,8 +352,8 @@ export function InvoiceEditor({
                                   : item,
                             );
 
-                            onUpdateInvoice({
-                              ...invoice,
+                            setDraftInvoice({
+                              ...draftInvoice,
                               lineItems,
                               totals: calculateInvoiceTotals(lineItems),
                             });
@@ -374,7 +376,7 @@ export function InvoiceEditor({
                           step="0.01"
                           value={centsToEuroInput(lineItem.unitPriceCents)}
                           onChange={(event) => {
-                            const lineItems = invoice.lineItems.map(
+                            const lineItems = draftInvoice.lineItems.map(
                               (item, itemIndex) =>
                                 itemIndex === index
                                   ? {
@@ -386,8 +388,8 @@ export function InvoiceEditor({
                                   : item,
                             );
 
-                            onUpdateInvoice({
-                              ...invoice,
+                            setDraftInvoice({
+                              ...draftInvoice,
                               lineItems,
                               totals: calculateInvoiceTotals(lineItems),
                             });
@@ -401,6 +403,15 @@ export function InvoiceEditor({
               </div>
             </div>
           ) : null}
+        </div>
+        <div className="border-t border-slate-200 px-5 py-4">
+          <button
+            type="button"
+            onClick={() => onSaveInvoice(draftInvoice)}
+            className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white"
+          >
+            Änderungen speichern
+          </button>
         </div>
       </div>
     </section>

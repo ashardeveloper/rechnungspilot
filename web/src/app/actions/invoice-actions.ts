@@ -11,6 +11,7 @@ import {
   updateInvoiceForUser,
 } from "@/server/invoices/invoice-repository";
 import { reserveNextInvoiceNumber } from "@/server/settings/invoice-number-settings-repository";
+import { createInvoiceAuditEvent } from "@/server/invoices/invoice-audit-repository";
 
 export async function listDemoInvoicesAction() {
   const userId = await getCurrentUserId();
@@ -35,13 +36,38 @@ export async function createDraftInvoiceAction() {
 
   await createInvoiceForUser(userId, draftInvoice);
 
+  await createInvoiceAuditEvent({
+    invoiceId: draftInvoice.id,
+    userId,
+    type: "created",
+    message: `Rechnung ${draftInvoice.number} wurde erstellt.`,
+  });
+
   return listInvoicesForUser(userId);
 }
 
 export async function updateInvoiceAction(invoice: CanonicalInvoice) {
   const userId = await getCurrentUserId();
 
+  const existingInvoices = await listInvoicesForUser(userId);
+  const existingInvoice = existingInvoices.find(
+    (item) => item.id === invoice.id,
+  );
+
   await updateInvoiceForUser(userId, invoice);
+
+  await createInvoiceAuditEvent({
+    invoiceId: invoice.id,
+    userId,
+    type:
+      existingInvoice && existingInvoice.status !== invoice.status
+        ? "status_changed"
+        : "updated",
+    message:
+      existingInvoice && existingInvoice.status !== invoice.status
+        ? `Status geändert: ${existingInvoice.status} -> ${invoice.status}.`
+        : `Rechnung ${invoice.number} wurde aktualisiert.`,
+  });
 
   return listInvoicesForUser(userId);
 }

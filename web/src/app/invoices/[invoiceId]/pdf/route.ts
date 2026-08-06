@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { renderInvoicePdf } from "@/server/pdf/invoice-pdf";
 import { getCurrentUserId } from "@/server/auth/current-user";
 import { listInvoicesForUser } from "@/server/invoices/invoice-repository";
+import { createInvoiceAuditEvent } from "@/server/invoices/invoice-audit-repository";
 export const runtime = "nodejs";
 
 export async function GET(
@@ -26,6 +27,13 @@ export async function GET(
   }
 
   const pdf = await renderInvoicePdf(invoice);
+
+  await createInvoiceAuditEvent({
+    invoiceId: invoice.id,
+    userId,
+    type: "pdf_downloaded",
+    message: `PDF für Rechnung ${invoice.number} wurde heruntergeladen.`,
+  });
 
   return new NextResponse(pdf, {
     headers: {
