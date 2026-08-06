@@ -27,12 +27,21 @@ export function InvoicePreview({ invoice }: { invoice: CanonicalInvoice }) {
             <span className="rounded-md bg-slate-950 px-3 py-1.5 text-sm font-medium text-white">
               {formatCurrency(invoice.totals.grossAmountCents)}
             </span>
-            <a
-              href={`/invoices/${invoice.id}/pdf`}
-              className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 print:hidden"
-            >
-              PDF herunterladen
-            </a>
+            {invoice.status === "issued" || invoice.status === "paid" ? (
+              <a
+                href={`/invoices/${invoice.id}/pdf`}
+                className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 print:hidden"
+              >
+                PDF herunterladen
+              </a>
+            ) : (
+              <span
+                title="PDF-Download ist erst nach dem Ausstellen verfügbar."
+                className="rounded-md border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-400 print:hidden"
+              >
+                PDF erst nach Ausstellung
+              </span>
+            )}
           </div>
         </div>
 

@@ -18,6 +18,13 @@ export async function GET(
     return NextResponse.json({ error: "Invoice not found." }, { status: 404 });
   }
 
+  if (invoice.status !== "issued" && invoice.status !== "paid") {
+    return NextResponse.json(
+      { error: "Only issued invoices can be downloaded as PDF." },
+      { status: 409 },
+    );
+  }
+
   const pdf = await renderInvoicePdf(invoice);
 
   return new NextResponse(pdf, {
