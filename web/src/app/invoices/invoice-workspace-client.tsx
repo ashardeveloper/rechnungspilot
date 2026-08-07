@@ -11,7 +11,7 @@ import {
 import { InvoiceEditor } from "@/components/invoices/invoice-editor";
 import { InvoiceList } from "@/components/invoices/invoice-list";
 import { InvoicePreview } from "@/components/invoices/invoice-preview";
-import type { CanonicalInvoice } from "@/domain/invoice";
+import type { CanonicalInvoice, InvoiceStatus } from "@/domain/invoice";
 import {
   getInvoiceStatusTransitions,
   transitionInvoiceStatus,
@@ -75,6 +75,13 @@ export function InvoiceWorkspaceClient({
 }: InvoiceWorkspaceClientProps) {
   const [isPending, startTransition] = useTransition();
   const [auditEvents, setAuditEvents] = useState<InvoiceAuditEvent[]>([]);
+  const [invoiceSearch, setInvoiceSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "all">(
+    "all",
+  );
+  const [dueFilter, setDueFilter] = useState<
+    "all" | "draft" | "open" | "due_soon" | "overdue" | "paid"
+  >("all");
   const [state, dispatch] = useReducer(workspaceReducer, {
     invoices: initialInvoices,
     selectedInvoiceId: initialInvoices[0]?.id ?? "",
@@ -87,6 +94,27 @@ export function InvoiceWorkspaceClient({
       ) ?? state.invoices[0],
     [state.invoices, state.selectedInvoiceId],
   );
+
+  const filteredInvoices = useMemo(() => {
+    const query = invoiceSearch.trim().toLowerCase();
+
+    return state.invoices.filter((invoice) => {
+      const matchesQuery =
+        !query ||
+        [invoice.number, invoice.buyer.name, invoice.buyer.city]
+          .join(" ")
+          .toLowerCase()
+          .includes(query);
+
+      const matchesStatus =
+        statusFilter === "all" || invoice.status === statusFilter;
+
+      const dueStatus = getInvoiceDueStatus(invoice);
+      const matchesDue = dueFilter === "all" || dueStatus === dueFilter;
+
+      return matchesQuery && matchesStatus && matchesDue;
+    });
+  }, [state.invoices, invoiceSearch, statusFilter, dueFilter]);
 
   useEffect(() => {
     if (!selectedInvoice) {
@@ -268,13 +296,60 @@ export function InvoiceWorkspaceClient({
       </section>
 
       <section className="mx-auto grid max-w-6xl gap-6 px-6 py-8 lg:grid-cols-[1.4fr_0.8fr] print:hidden">
-        <InvoiceList
-          invoices={state.invoices}
-          selectedInvoiceId={selectedInvoice?.id ?? ""}
-          onSelectInvoice={(invoiceId) =>
-            dispatch({ type: "select_invoice", invoiceId })
-          }
-        />
+        <div className="space-y-4">
+          <div className="rounded-lg border border-slate-200 bg-white px-5 py-4">
+            <div className="grid gap-3 md:grid-cols-[1fr_180px_180px]">
+              <input
+                value={invoiceSearch}
+                onChange={(event) => setInvoiceSearch(event.target.value)}
+                placeholder="Rechnung oder Kunde suchen..."
+                className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              />
+
+              <select
+                value={statusFilter}
+                onChange={(event) =>
+                  setStatusFilter(event.target.value as InvoiceStatus | "all")
+                }
+                className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              >
+                <option value="all">Alle Status</option>
+                <option value="draft">Entwurf</option>
+                <option value="review_ready">Prüfbereit</option>
+                <option value="issued">Ausgestellt</option>
+                <option value="paid">Bezahlt</option>
+              </select>
+
+              <select
+                value={dueFilter}
+                onChange={(event) =>
+                  setDueFilter(event.target.value as typeof dueFilter)
+                }
+                className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              >
+                <option value="all">Alle Fälligkeiten</option>
+                <option value="draft">Entwurf</option>
+                <option value="open">Offen</option>
+                <option value="due_soon">Bald fällig</option>
+                <option value="overdue">Überfällig</option>
+                <option value="paid">Bezahlt</option>
+              </select>
+            </div>
+
+            <p className="mt-3 text-sm text-slate-600">
+              {filteredInvoices.length} von {state.invoices.length} Rechnungen
+              angezeigt.
+            </p>
+          </div>
+
+          <InvoiceList
+            invoices={filteredInvoices}
+            selectedInvoiceId={selectedInvoice?.id ?? ""}
+            onSelectInvoice={(invoiceId) =>
+              dispatch({ type: "select_invoice", invoiceId })
+            }
+          />
+        </div>
 
         <aside className="rounded-lg border border-slate-200 bg-white">
           <div className="border-b border-slate-200 px-5 py-4">

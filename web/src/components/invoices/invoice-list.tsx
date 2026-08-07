@@ -29,6 +29,11 @@ export function InvoiceList({
       </div>
 
       <div className="divide-y divide-slate-200">
+        {invoices.length === 0 ? (
+          <div className="px-5 py-8 text-sm text-slate-600">
+            Keine Rechnungen für die aktuelle Suche gefunden.
+          </div>
+        ) : null}
         {invoices.map((invoice) => {
           const isSelected = invoice.id === selectedInvoiceId;
           const dueStatus = getInvoiceDueStatus(invoice);
