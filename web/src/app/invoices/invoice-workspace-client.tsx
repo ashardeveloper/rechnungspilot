@@ -20,6 +20,7 @@ import type { Customer } from "@/domain/customer";
 import Link from "next/link";
 import { listInvoiceAuditEventsAction } from "@/app/actions/invoice-audit-actions";
 import type { InvoiceAuditEvent } from "@/domain/invoice-audit";
+import { getInvoiceDueStatus } from "@/domain/invoice-due-status";
 
 type WorkspaceState = {
   invoices: CanonicalInvoice[];
@@ -119,6 +120,12 @@ export function InvoiceWorkspaceClient({
         .length,
       issued: state.invoices.filter((invoice) => invoice.status === "issued")
         .length,
+      dueSoon: state.invoices.filter(
+        (invoice) => getInvoiceDueStatus(invoice) === "due_soon",
+      ).length,
+      overdue: state.invoices.filter(
+        (invoice) => getInvoiceDueStatus(invoice) === "overdue",
+      ).length,
     }),
     [state.invoices],
   );
@@ -222,7 +229,7 @@ export function InvoiceWorkspaceClient({
       </section>
 
       <section className="border-b border-slate-200 bg-white print:hidden">
-        <div className="mx-auto grid max-w-6xl gap-4 px-6 py-5 sm:grid-cols-5">
+        <div className="mx-auto grid max-w-6xl gap-4 px-6 py-5 sm:grid-cols-7">
           <div>
             <p className="text-sm text-slate-600">Gesamt</p>
             <p className="mt-1 text-2xl font-semibold">{invoiceStats.total}</p>
@@ -244,6 +251,18 @@ export function InvoiceWorkspaceClient({
           <div>
             <p className="text-sm text-slate-600">Bezahlt</p>
             <p className="mt-1 text-2xl font-semibold">{invoiceStats.paid}</p>
+          </div>
+          <div>
+            <p className="text-sm text-slate-600">Bald fällig</p>
+            <p className="mt-1 text-2xl font-semibold">
+              {invoiceStats.dueSoon}
+            </p>
+          </div>
+          <div>
+            <p className="text-sm text-slate-600">Überfällig</p>
+            <p className="mt-1 text-2xl font-semibold">
+              {invoiceStats.overdue}
+            </p>
           </div>
         </div>
       </section>

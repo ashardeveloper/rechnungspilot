@@ -2,6 +2,10 @@ import type { CanonicalInvoice } from "@/domain/invoice";
 
 import { formatCurrency, formatDate } from "./formatting";
 import { invoiceStatusLabels } from "./invoice-status";
+import {
+  getInvoiceDueStatus,
+  getInvoiceDueStatusLabel,
+} from "@/domain/invoice-due-status";
 
 type InvoiceListProps = {
   invoices: CanonicalInvoice[];
@@ -27,6 +31,7 @@ export function InvoiceList({
       <div className="divide-y divide-slate-200">
         {invoices.map((invoice) => {
           const isSelected = invoice.id === selectedInvoiceId;
+          const dueStatus = getInvoiceDueStatus(invoice);
 
           return (
             <button
@@ -44,6 +49,9 @@ export function InvoiceList({
               <div className="flex items-center gap-4 sm:justify-end">
                 <span className="text-sm text-slate-600">
                   {formatDate(invoice.dueDate)}
+                  <span className="ml-2 rounded-md bg-slate-100 px-2 py-1 text-xs">
+                    {getInvoiceDueStatusLabel(dueStatus)}
+                  </span>
                 </span>
                 <span className="w-32 text-right font-medium">
                   {formatCurrency(invoice.totals.grossAmountCents)}
