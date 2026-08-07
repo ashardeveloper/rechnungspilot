@@ -12,6 +12,7 @@ import {
 } from "@/server/invoices/invoice-repository";
 import { reserveNextInvoiceNumber } from "@/server/settings/invoice-number-settings-repository";
 import { createInvoiceAuditEvent } from "@/server/invoices/invoice-audit-repository";
+import { getBusinessProfileForUser } from "@/server/settings/business-profile-repository";
 
 export async function listDemoInvoicesAction() {
   const userId = await getCurrentUserId();
@@ -32,7 +33,8 @@ export async function createDraftInvoiceAction() {
 
   const invoices = await listInvoicesForUser(userId);
   const invoiceNumber = await reserveNextInvoiceNumber(userId);
-  const draftInvoice = createDraftInvoice(invoices, invoiceNumber);
+  const seller = await getBusinessProfileForUser(userId);
+  const draftInvoice = createDraftInvoice(invoices, invoiceNumber, seller);
 
   await createInvoiceForUser(userId, draftInvoice);
 

@@ -1,5 +1,6 @@
 import { calculateInvoiceTotals } from "./invoice-calculations";
 import type { CanonicalInvoice, InvoiceLineItem } from "./invoice";
+import type { InvoiceParty } from "./invoice";
 
 function padInvoiceSequence(sequence: number) {
   return String(sequence).padStart(3, "0");
@@ -28,6 +29,7 @@ function formatIsoDate(date: Date) {
 export function createDraftInvoice(
   invoices: CanonicalInvoice[],
   invoiceNumber?: string,
+  seller?: InvoiceParty,
 ): CanonicalInvoice {
   const today = new Date();
   const lineItems: InvoiceLineItem[] = [
@@ -50,7 +52,7 @@ export function createDraftInvoice(
     issueDate: formatIsoDate(today),
     dueDate: formatIsoDate(addDays(today, 14)),
     currency: "EUR",
-    seller: {
+    seller: seller ?? {
       name: "RechnungsPilot Demo",
       street: "Musterstraße 12",
       postalCode: "10115",
