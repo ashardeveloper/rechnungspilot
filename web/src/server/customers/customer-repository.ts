@@ -94,3 +94,48 @@ export async function deleteCustomersForUser(userId: string) {
     where: { userId },
   });
 }
+
+export type CustomerSearchResult = {
+  customers: Customer[];
+  nextCursor?: string;
+};
+
+export async function searchCustomersForUser({
+  userId,
+  query,
+  cursor,
+  limit = 25,
+}: {
+  userId: string;
+  query?: string;
+  cursor?: string;
+  limit?: number;
+}): Promise<CustomerSearchResult> {
+  const normalizedQuery = query?.trim();
+  const take = limit + 1;
+
+  const customers = await prisma.customer.findMany({
+    where: {
+      userId,
+      ...(normalizedQuery
+        ? {
+            OR: [
+              { name: { contains: normalizedQuery } },
+              { city: { contains: normalizedQuery } },
+              { street: { contains: normalizedQuery } },
+            ],
+          }
+        : {}),
+    },
+    orderBy: [{ name: "asc" }, { id: "asc" }],
+    ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+    take,
+  });
+
+  const page = customers.slice(0, limit);
+
+  return {
+    customers: page.map(toCustomer),
+    nextCursor: customers.length > limit ? page.at(-1)?.id : undefined,
+  };
+}

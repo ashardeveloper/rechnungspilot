@@ -3,11 +3,12 @@ import { redirect } from "next/navigation";
 
 import {
   createCustomerAction,
-  listCustomersAction,
+  searchCustomersAction,
   updateCustomerAction,
 } from "@/app/actions/customer-actions";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { auth } from "@/server/auth/auth";
+import { CustomerManagementClient } from "./customer-management-client";
 
 export default async function CustomersPage({
   searchParams,
@@ -21,21 +22,12 @@ export default async function CustomersPage({
   }
 
   const params = await searchParams;
-  const query = params.q?.trim().toLowerCase() ?? "";
-  const customers = await listCustomersAction();
-
-  const filteredCustomers = customers
-    .filter((customer) =>
-      [customer.name, customer.city, customer.street]
-        .join(" ")
-        .toLowerCase()
-        .includes(query),
-    )
-    .slice(0, 25);
+  const result = await searchCustomersAction({ query: params.q });
+  const customers = result.customers;
 
   const selectedCustomer =
     customers.find((customer) => customer.id === params.selected) ??
-    filteredCustomers[0];
+    customers[0];
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
@@ -60,64 +52,11 @@ export default async function CustomersPage({
       </section>
 
       <section className="mx-auto grid max-w-6xl gap-6 px-6 py-8 lg:grid-cols-[1fr_380px]">
-        <div className="rounded-lg border border-slate-200 bg-white">
-          <div className="border-b border-slate-200 px-5 py-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h2 className="text-lg font-semibold">Kundenliste</h2>
-                <p className="mt-1 text-sm text-slate-600">
-                  {customers.length} Kundendatensätze im Workspace.
-                </p>
-              </div>
-
-              <form className="w-full sm:w-80">
-                <input
-                  name="q"
-                  defaultValue={params.q ?? ""}
-                  placeholder="Kunden suchen..."
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                />
-              </form>
-            </div>
-          </div>
-
-          <div className="divide-y divide-slate-200">
-            {filteredCustomers.map((customer) => (
-              <Link
-                key={customer.id}
-                href={`/customers?${new URLSearchParams({
-                  ...(params.q ? { q: params.q } : {}),
-                  selected: customer.id,
-                })}`}
-                className={`grid gap-2 px-5 py-4 text-sm hover:bg-cyan-50 sm:grid-cols-[1fr_1fr_auto] ${
-                  selectedCustomer?.id === customer.id ? "bg-cyan-50" : ""
-                }`}
-              >
-                <div>
-                  <p className="font-medium text-slate-950">{customer.name}</p>
-                  <p className="text-slate-600">
-                    {customer.postalCode} {customer.city}
-                  </p>
-                </div>
-                <p className="text-slate-600">{customer.street}</p>
-                <span className="text-right text-slate-500">Bearbeiten</span>
-              </Link>
-            ))}
-
-            {filteredCustomers.length === 0 ? (
-              <div className="px-5 py-8 text-sm text-slate-600">
-                Kein Kunde gefunden.
-              </div>
-            ) : null}
-          </div>
-
-          {customers.length > 25 ? (
-            <div className="border-t border-slate-200 px-5 py-3 text-sm text-slate-500">
-              Es werden maximal 25 Treffer angezeigt. Suche verfeinern für mehr
-              Präzision.
-            </div>
-          ) : null}
-        </div>
+        <CustomerManagementClient
+          initialCustomers={customers}
+          initialNextCursor={result.nextCursor}
+          initialQuery={params.q ?? ""}
+        />
 
         <aside className="space-y-6">
           <form

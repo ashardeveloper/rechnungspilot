@@ -2,11 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { getCurrentUserId } from "@/server/auth/current-user";
-import { listCustomersForUser } from "@/server/customers/customer-repository";
 import { seedDemoCustomers } from "@/server/demo/seed-demo-customers";
 import type { Customer } from "@/domain/customer";
-import { upsertCustomerForUser } from "@/server/customers/customer-repository";
-import { updateCustomerForUser } from "@/server/customers/customer-repository";
+
+import {
+  listCustomersForUser,
+  searchCustomersForUser,
+  upsertCustomerForUser,
+  updateCustomerForUser,
+} from "@/server/customers/customer-repository";
 
 export async function listCustomersAction() {
   const userId = await getCurrentUserId();
@@ -57,4 +61,34 @@ export async function updateCustomerAction(formData: FormData) {
 
   revalidatePath("/customers");
   revalidatePath("/invoices");
+}
+
+export async function searchCustomersAction({
+  query,
+  cursor,
+}: {
+  query?: string;
+  cursor?: string;
+}) {
+  const userId = await getCurrentUserId();
+
+  const result = await searchCustomersForUser({
+    userId,
+    query,
+    cursor,
+    limit: 25,
+  });
+
+  if (result.customers.length > 0 || query || cursor) {
+    return result;
+  }
+
+  await seedDemoCustomers();
+
+  return searchCustomersForUser({
+    userId,
+    query,
+    cursor,
+    limit: 25,
+  });
 }
