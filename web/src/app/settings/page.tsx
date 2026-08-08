@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import {
@@ -9,6 +8,7 @@ import {
 } from "@/app/actions/settings-actions";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { auth } from "@/server/auth/auth";
+import { AppShell } from "@/components/layout/app-shell";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -23,29 +23,12 @@ export default async function SettingsPage() {
   ]);
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-950">
-      <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-5">
-          <div>
-            <p className="text-sm font-medium text-cyan-700">
-              RechnungsPilot DE
-            </p>
-            <h1 className="text-2xl font-semibold tracking-tight">
-              Einstellungen
-            </h1>
-            <p className="mt-1 text-sm text-slate-600">
-              Nummernkreis für neue Rechnungen konfigurieren.
-            </p>
-          </div>
-          <Link
-            href="/invoices"
-            className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700"
-          >
-            Zu Rechnungen
-          </Link>
-        </div>
-      </section>
-
+    <AppShell
+      title="Einstellungen"
+      description="Nummernkreis und Absenderprofil für neue Rechnungen konfigurieren."
+      userEmail={session.user.email ?? "Angemeldeter Nutzer"}
+      activePath="/settings"
+    >
       <section className="mx-auto grid max-w-6xl gap-6 px-6 py-8 lg:grid-cols-2">
         <form
           action={updateInvoiceNumberSettingsAction}
@@ -181,6 +164,6 @@ export default async function SettingsPage() {
           </div>
         </form>
       </section>
-    </main>
+    </AppShell>
   );
 }

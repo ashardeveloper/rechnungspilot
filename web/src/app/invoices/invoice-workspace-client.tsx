@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useReducer, useState, useTransition } from "react";
-import { signOutCurrentUser } from "@/app/actions/auth-actions";
 
 import {
   createDraftInvoiceAction,
@@ -17,7 +16,6 @@ import {
   transitionInvoiceStatus,
 } from "@/domain/invoice-lifecycle";
 import type { Customer } from "@/domain/customer";
-import Link from "next/link";
 import { listInvoiceAuditEventsAction } from "@/app/actions/invoice-audit-actions";
 import type { InvoiceAuditEvent } from "@/domain/invoice-audit";
 import { getInvoiceDueStatus } from "@/domain/invoice-due-status";
@@ -203,39 +201,18 @@ export function InvoiceWorkspaceClient({
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-950">
+    <>
       <section className="border-b border-slate-200 bg-white print:hidden">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-5">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-5">
           <div>
-            <p className="text-sm font-medium text-cyan-700">
-              RechnungsPilot DE
+            <h2 className="text-lg font-semibold">Arbeitsbereich</h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Rechnungen werden datenbankgestützt gespeichert und pro Nutzer
+              getrennt.
             </p>
-            <h1 className="text-2xl font-semibold tracking-tight">
-              Lokaler Rechnungsarbeitsplatz
-            </h1>
-            <p className="mt-1 text-sm text-slate-600">{userEmail}</p>
           </div>
-          <div className="flex gap-2">
-            <Link
-              href="/customers"
-              className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700"
-            >
-              Kunden
-            </Link>
-            <Link
-              href="/settings"
-              className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700"
-            >
-              Einstellungen
-            </Link>
-            <form action={signOutCurrentUser}>
-              <button
-                type="submit"
-                className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700"
-              >
-                Abmelden
-              </button>
-            </form>
+
+          <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={resetDemoData}
@@ -255,7 +232,6 @@ export function InvoiceWorkspaceClient({
           </div>
         </div>
       </section>
-
       <section className="border-b border-slate-200 bg-white print:hidden">
         <div className="mx-auto grid max-w-6xl gap-4 px-6 py-5 sm:grid-cols-7">
           <div>
@@ -463,6 +439,6 @@ export function InvoiceWorkspaceClient({
           </div>
         </section>
       ) : null}
-    </main>
+    </>
   );
 }

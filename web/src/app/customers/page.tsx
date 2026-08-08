@@ -9,6 +9,7 @@ import {
 import { SubmitButton } from "@/components/ui/submit-button";
 import { auth } from "@/server/auth/auth";
 import { CustomerManagementClient } from "./customer-management-client";
+import { AppShell } from "@/components/layout/app-shell";
 
 export default async function CustomersPage({
   searchParams,
@@ -30,27 +31,12 @@ export default async function CustomersPage({
     customers[0];
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-950">
-      <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-5">
-          <div>
-            <p className="text-sm font-medium text-cyan-700">
-              RechnungsPilot DE
-            </p>
-            <h1 className="text-2xl font-semibold tracking-tight">Kunden</h1>
-            <p className="mt-1 text-sm text-slate-600">
-              Stammdaten für wiederverwendbare Rechnungsempfänger.
-            </p>
-          </div>
-          <Link
-            href="/invoices"
-            className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700"
-          >
-            Zu Rechnungen
-          </Link>
-        </div>
-      </section>
-
+    <AppShell
+      title="Kunden"
+      description="Stammdaten für wiederverwendbare Rechnungsempfänger."
+      userEmail={session.user.email ?? "Angemeldeter Nutzer"}
+      activePath="/customers"
+    >
       <section className="mx-auto grid max-w-6xl gap-6 px-6 py-8 lg:grid-cols-[1fr_380px]">
         <CustomerManagementClient
           initialCustomers={customers}
@@ -94,7 +80,7 @@ export default async function CustomersPage({
           ) : null}
         </aside>
       </section>
-    </main>
+    </AppShell>
   );
 }
 
