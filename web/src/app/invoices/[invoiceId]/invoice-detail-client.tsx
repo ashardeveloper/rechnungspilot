@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 
 import { listInvoiceAuditEventsAction } from "@/app/actions/invoice-audit-actions";
 import { updateInvoiceAction } from "@/app/actions/invoice-actions";
@@ -29,25 +29,10 @@ export function InvoiceDetailClient({
   const [isEditing, setIsEditing] = useState(false);
   const [isAuditOpen, setIsAuditOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [hasLoadedAuditEvents, setHasLoadedAuditEvents] = useState(false);
 
   const isLocked =
     currentInvoice.status === "issued" || currentInvoice.status === "paid";
-
-  useEffect(() => {
-    let isCurrent = true;
-
-    startTransition(async () => {
-      const events = await listInvoiceAuditEventsAction(currentInvoice.id);
-
-      if (isCurrent) {
-        setAuditEvents(events);
-      }
-    });
-
-    return () => {
-      isCurrent = false;
-    };
-  }, [currentInvoice.id]);
 
   function saveInvoice(nextInvoice: CanonicalInvoice) {
     startTransition(async () => {
@@ -58,13 +43,33 @@ export function InvoiceDetailClient({
       setCurrentInvoice(updatedInvoice);
       setIsEditing(false);
 
-      const events = await listInvoiceAuditEventsAction(updatedInvoice.id);
-      setAuditEvents(events);
+      if (hasLoadedAuditEvents) {
+        const events = await listInvoiceAuditEventsAction(updatedInvoice.id);
+        setAuditEvents(events);
+      }
     });
   }
 
   function updateInvoiceStatus(status: CanonicalInvoice["status"]) {
     saveInvoice(transitionInvoiceStatus(currentInvoice, status));
+  }
+
+  function loadAuditEvents() {
+    startTransition(async () => {
+      const events = await listInvoiceAuditEventsAction(currentInvoice.id);
+      setAuditEvents(events);
+      setHasLoadedAuditEvents(true);
+    });
+  }
+
+  function toggleAuditPanel() {
+    const nextValue = !isAuditOpen;
+
+    setIsAuditOpen(nextValue);
+
+    if (nextValue && !hasLoadedAuditEvents) {
+      loadAuditEvents();
+    }
   }
 
   return (
@@ -137,7 +142,7 @@ export function InvoiceDetailClient({
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
           <button
             type="button"
-            onClick={() => setIsAuditOpen((current) => !current)}
+            onClick={toggleAuditPanel}
             className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left hover:bg-slate-50"
           >
             <div>
@@ -149,13 +154,21 @@ export function InvoiceDetailClient({
             </div>
 
             <span className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700">
-              {isAuditOpen ? "Historie ausblenden" : "Historie anzeigen"}
+              {isAuditOpen
+                ? "Historie ausblenden"
+                : hasLoadedAuditEvents
+                  ? `Historie anzeigen (${auditEvents.length})`
+                  : "Historie anzeigen"}
             </span>
           </button>
 
           {isAuditOpen ? (
             <div className="border-t border-slate-200">
-              {auditEvents.length > 0 ? (
+              {isPending && !hasLoadedAuditEvents ? (
+                <div className="px-5 py-4 text-sm text-slate-600">
+                  Historie wird geladen...
+                </div>
+              ) : auditEvents.length > 0 ? (
                 <div className="divide-y divide-slate-200">
                   {auditEvents.map((event) => (
                     <div
