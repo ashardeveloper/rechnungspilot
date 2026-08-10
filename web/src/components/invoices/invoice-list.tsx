@@ -7,6 +7,7 @@ import {
   getInvoiceDueStatusLabel,
 } from "@/domain/invoice-due-status";
 import Link from "next/link";
+import { ChevronRight, FileText } from "lucide-react";
 
 type InvoiceListProps = {
   invoices: CanonicalInvoice[];
@@ -16,7 +17,7 @@ export function InvoiceList({ invoices }: InvoiceListProps) {
   return (
     <div className="rounded-lg border border-slate-200 bg-white">
       <div className="border-b border-slate-200 px-5 py-4">
-        <h2 className="text-lg font-semibold">Rechnungen</h2>
+        <h2 className="text-xl font-semibold">Rechnungen</h2>
         <p className="mt-1 text-sm text-slate-600">
           MVP-Daten für lokale Erstellung, PDF-Ausgabe und spätere
           XML-Validierung.
@@ -36,11 +37,16 @@ export function InvoiceList({ invoices }: InvoiceListProps) {
             <Link
               key={invoice.id}
               href={`/invoices/${invoice.id}`}
-              className="grid w-full gap-3 px-5 py-4 text-left transition hover:bg-slate-50 sm:grid-cols-[1fr_auto]"
+              className="grid w-full gap-3 px-5 py-3 text-left transition hover:bg-slate-50 sm:grid-cols-[1fr_auto]"
             >
-              <div>
-                <p className="font-medium">{invoice.number}</p>
-                <p className="text-sm text-slate-600">{invoice.buyer.name}</p>
+              <div className="flex items-center gap-4">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+                  <FileText size={18} strokeWidth={2} />
+                </span>
+                <div>
+                  <p className="font-medium">{invoice.number}</p>
+                  <p className="text-sm text-slate-600">{invoice.buyer.name}</p>
+                </div>
               </div>
               <div className="flex items-center gap-4 sm:justify-end">
                 <span className="text-sm text-slate-600">

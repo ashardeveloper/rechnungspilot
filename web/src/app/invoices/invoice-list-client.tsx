@@ -1,6 +1,18 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  CheckSquare,
+  Clock3,
+  FileText,
+  PencilLine,
+  Plus,
+  RefreshCw,
+  Search,
+  Send,
+} from "lucide-react";
 
 import {
   createDraftInvoiceAction,
@@ -67,119 +79,179 @@ export function InvoiceListClient({ initialInvoices }: InvoiceListClientProps) {
 
   function createDraftInvoice() {
     startTransition(async () => {
-      const updatedInvoices = await createDraftInvoiceAction();
-      setInvoices(updatedInvoices);
+      setInvoices(await createDraftInvoiceAction());
     });
   }
 
   function resetDemoData() {
     startTransition(async () => {
-      const updatedInvoices = await resetDemoInvoicesAction();
-      setInvoices(updatedInvoices);
+      setInvoices(await resetDemoInvoicesAction());
     });
   }
 
   return (
-    <>
-      <section className="border-b border-slate-200 bg-white print:hidden">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-5">
+    <section className="mx-auto max-w-6xl space-y-4 px-6 py-6">
+      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold">Rechnungsübersicht</h2>
+            <h2 className="text-xl font-semibold">Rechnungsübersicht</h2>
             <p className="mt-1 text-sm text-slate-600">
               Suchen, filtern und neue Rechnungen anlegen.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             <button
               type="button"
               onClick={resetDemoData}
               disabled={isPending}
-              className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm disabled:opacity-60"
             >
-              {isPending ? "Wird gespeichert..." : "Beispieldaten zurücksetzen"}
+              <RefreshCw size={16} />
+              Beispieldaten zurücksetzen
             </button>
             <button
               type="button"
               onClick={createDraftInvoice}
               disabled={isPending}
-              className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-md bg-slate-950 px-3 py-2 text-sm font-medium text-white shadow-sm disabled:opacity-60"
             >
-              {isPending ? "Wird erstellt..." : "Neue Rechnung"}
+              <Plus size={16} />
+              Neue Rechnung
             </button>
           </div>
         </div>
-      </section>
 
-      <section className="border-b border-slate-200 bg-white print:hidden">
-        <div className="mx-auto grid max-w-6xl gap-4 px-6 py-5 sm:grid-cols-7">
-          <Metric label="Gesamt" value={invoiceStats.total} />
-          <Metric label="Entwürfe" value={invoiceStats.drafts} />
-          <Metric label="Prüfbereit" value={invoiceStats.reviewReady} />
-          <Metric label="Ausgestellt" value={invoiceStats.issued} />
-          <Metric label="Bezahlt" value={invoiceStats.paid} />
-          <Metric label="Bald fällig" value={invoiceStats.dueSoon} />
-          <Metric label="Überfällig" value={invoiceStats.overdue} />
+        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-7">
+          <Metric
+            icon={<FileText size={24} />}
+            label="Gesamt"
+            value={invoiceStats.total}
+            tone="blue"
+          />
+          <Metric
+            icon={<PencilLine size={24} />}
+            label="Entwürfe"
+            value={invoiceStats.drafts}
+            tone="blue"
+          />
+          <Metric
+            icon={<CheckSquare size={24} />}
+            label="Prüfbereit"
+            value={invoiceStats.reviewReady}
+            tone="blue"
+          />
+          <Metric
+            icon={<Send size={24} />}
+            label="Ausgestellt"
+            value={invoiceStats.issued}
+            tone="blue"
+          />
+          <Metric
+            icon={<CheckCircle2 size={24} />}
+            label="Bezahlt"
+            value={invoiceStats.paid}
+            tone="green"
+          />
+          <Metric
+            icon={<Clock3 size={24} />}
+            label="Bald fällig"
+            value={invoiceStats.dueSoon}
+            tone="amber"
+          />
+          <Metric
+            icon={<AlertCircle size={24} />}
+            label="Überfällig"
+            value={invoiceStats.overdue}
+            tone="red"
+          />
         </div>
-      </section>
+      </div>
 
-      <section className="mx-auto max-w-6xl px-6 py-8 print:hidden">
-        <div className="mb-4 rounded-lg border border-slate-200 bg-white px-5 py-4">
-          <div className="grid gap-3 md:grid-cols-[1fr_180px_180px]">
+      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="grid gap-4 lg:grid-cols-[1fr_280px_280px]">
+          <label className="relative block">
+            <Search
+              size={18}
+              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+            />
             <input
               value={invoiceSearch}
               onChange={(event) => setInvoiceSearch(event.target.value)}
               placeholder="Rechnung oder Kunde suchen..."
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="h-10 w-full rounded-lg border border-slate-300 pl-10 pr-4 text-sm shadow-sm outline-none focus:border-slate-500"
             />
+          </label>
 
-            <select
-              value={statusFilter}
-              onChange={(event) =>
-                setStatusFilter(event.target.value as InvoiceStatus | "all")
-              }
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-            >
-              <option value="all">Alle Status</option>
-              <option value="draft">Entwurf</option>
-              <option value="review_ready">Prüfbereit</option>
-              <option value="issued">Ausgestellt</option>
-              <option value="paid">Bezahlt</option>
-            </select>
+          <select
+            value={statusFilter}
+            onChange={(event) =>
+              setStatusFilter(event.target.value as InvoiceStatus | "all")
+            }
+            className="h-10 rounded-lg border border-slate-300 px-4 text-sm shadow-sm outline-none focus:border-slate-500"
+          >
+            <option value="all">Alle Status</option>
+            <option value="draft">Entwurf</option>
+            <option value="review_ready">Prüfbereit</option>
+            <option value="issued">Ausgestellt</option>
+            <option value="paid">Bezahlt</option>
+          </select>
 
-            <select
-              value={dueFilter}
-              onChange={(event) =>
-                setDueFilter(event.target.value as typeof dueFilter)
-              }
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-            >
-              <option value="all">Alle Fälligkeiten</option>
-              <option value="draft">Entwurf</option>
-              <option value="open">Offen</option>
-              <option value="due_soon">Bald fällig</option>
-              <option value="overdue">Überfällig</option>
-              <option value="paid">Bezahlt</option>
-            </select>
-          </div>
-
-          <p className="mt-3 text-sm text-slate-600">
-            {filteredInvoices.length} von {invoices.length} Rechnungen
-            angezeigt.
-          </p>
+          <select
+            value={dueFilter}
+            onChange={(event) =>
+              setDueFilter(event.target.value as typeof dueFilter)
+            }
+            className="h-10 rounded-lg border border-slate-300 px-4 text-sm shadow-sm outline-none focus:border-slate-500"
+          >
+            <option value="all">Alle Fälligkeiten</option>
+            <option value="draft">Entwurf</option>
+            <option value="open">Offen</option>
+            <option value="due_soon">Bald fällig</option>
+            <option value="overdue">Überfällig</option>
+            <option value="paid">Bezahlt</option>
+          </select>
         </div>
 
-        <InvoiceList invoices={filteredInvoices} />
-      </section>
-    </>
+        <p className="mt-4 text-sm text-slate-600">
+          {filteredInvoices.length} von {invoices.length} Rechnungen angezeigt.
+        </p>
+      </div>
+
+      <InvoiceList invoices={filteredInvoices} />
+    </section>
   );
 }
 
-function Metric({ label, value }: { label: string; value: number }) {
+function Metric({
+  icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+  tone: "blue" | "green" | "amber" | "red";
+}) {
+  const tones = {
+    blue: "bg-blue-50 text-blue-700",
+    green: "bg-emerald-50 text-emerald-700",
+    amber: "bg-amber-50 text-amber-700",
+    red: "bg-red-50 text-red-700",
+  };
+
   return (
-    <div>
-      <p className="text-sm text-slate-600">{label}</p>
-      <p className="mt-1 text-2xl font-semibold">{value}</p>
+    <div className="flex min-h-20 items-center gap-3 rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+      <span
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${tones[tone]}`}
+      >
+        {icon}
+      </span>
+      <div>
+        <p className="text-sm leading-5 text-slate-600">{label}</p>
+        <p className="text-2xl font-semibold leading-tight">{value}</p>
+      </div>
     </div>
   );
 }

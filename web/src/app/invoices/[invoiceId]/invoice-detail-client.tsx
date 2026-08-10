@@ -84,7 +84,7 @@ export function InvoiceDetailClient({
               <button
                 type="button"
                 onClick={() => setIsEditing((current) => !current)}
-                className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white"
+                className="rounded-md bg-slate-950 px-3 py-1.5 text-sm font-medium text-white"
               >
                 {isEditing ? "Bearbeitung schließen" : "Bearbeiten"}
               </button>
@@ -99,8 +99,8 @@ export function InvoiceDetailClient({
                 title={transition.blockedReason}
                 className={
                   transition.targetStatus === "paid"
-                    ? "rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
-                    : "rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    ? "rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    : "rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
                 }
               >
                 {transition.label}
