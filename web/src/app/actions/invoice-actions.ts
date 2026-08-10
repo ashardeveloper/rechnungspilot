@@ -8,6 +8,7 @@ import {
   createInvoiceForUser,
   deleteInvoicesForUser,
   listInvoicesForUser,
+  searchInvoicesForUser,
   getInvoiceForUser,
   updateInvoiceForUser,
 } from "@/server/invoices/invoice-repository";
@@ -27,6 +28,21 @@ export async function listDemoInvoicesAction() {
   await seedDemoInvoices();
 
   return listInvoicesForUser(userId);
+}
+
+export async function searchInvoicesAction(input: {
+  query?: string;
+  status?: string;
+  cursor?: string;
+}) {
+  const userId = await getCurrentUserId();
+
+  return searchInvoicesForUser({
+    userId,
+    query: input.query,
+    status: input.status,
+    cursor: input.cursor,
+  });
 }
 
 export async function getInvoiceAction(invoiceId: string) {

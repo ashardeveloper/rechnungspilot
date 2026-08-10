@@ -17,6 +17,7 @@ import {
 import {
   createDraftInvoiceAction,
   resetDemoInvoicesAction,
+  searchInvoicesAction,
 } from "@/app/actions/invoice-actions";
 import { InvoiceList } from "@/components/invoices/invoice-list";
 import type { CanonicalInvoice, InvoiceStatus } from "@/domain/invoice";
@@ -24,15 +25,22 @@ import { getInvoiceDueStatus } from "@/domain/invoice-due-status";
 
 type InvoiceListClientProps = {
   initialInvoices: CanonicalInvoice[];
+  initialNextCursor?: string;
+  initialQuery: string;
+  initialStatus: InvoiceStatus | "all";
 };
 
-export function InvoiceListClient({ initialInvoices }: InvoiceListClientProps) {
+export function InvoiceListClient({
+  initialInvoices,
+  initialNextCursor,
+  initialQuery,
+  initialStatus,
+}: InvoiceListClientProps) {
   const [invoices, setInvoices] = useState(initialInvoices);
+  const [nextCursor, setNextCursor] = useState(initialNextCursor);
   const [isPending, startTransition] = useTransition();
-  const [invoiceSearch, setInvoiceSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "all">(
-    "all",
-  );
+  const [invoiceSearch] = useState(initialQuery);
+  const [statusFilter] = useState<InvoiceStatus | "all">(initialStatus);
   const [dueFilter, setDueFilter] = useState<
     "all" | "draft" | "open" | "due_soon" | "overdue" | "paid"
   >("all");
@@ -57,25 +65,12 @@ export function InvoiceListClient({ initialInvoices }: InvoiceListClientProps) {
   );
 
   const filteredInvoices = useMemo(() => {
-    const query = invoiceSearch.trim().toLowerCase();
-
     return invoices.filter((invoice) => {
-      const matchesQuery =
-        !query ||
-        [invoice.number, invoice.buyer.name, invoice.buyer.city]
-          .join(" ")
-          .toLowerCase()
-          .includes(query);
-
-      const matchesStatus =
-        statusFilter === "all" || invoice.status === statusFilter;
-
       const dueStatus = getInvoiceDueStatus(invoice);
-      const matchesDue = dueFilter === "all" || dueStatus === dueFilter;
 
-      return matchesQuery && matchesStatus && matchesDue;
+      return dueFilter === "all" || dueStatus === dueFilter;
     });
-  }, [invoices, invoiceSearch, statusFilter, dueFilter]);
+  }, [invoices, dueFilter]);
 
   function createDraftInvoice() {
     startTransition(async () => {
@@ -86,6 +81,26 @@ export function InvoiceListClient({ initialInvoices }: InvoiceListClientProps) {
   function resetDemoData() {
     startTransition(async () => {
       setInvoices(await resetDemoInvoicesAction());
+    });
+  }
+
+  function loadMoreInvoices() {
+    if (!nextCursor) {
+      return;
+    }
+
+    startTransition(async () => {
+      const result = await searchInvoicesAction({
+        query: invoiceSearch,
+        status: statusFilter,
+        cursor: nextCursor,
+      });
+
+      setInvoices((currentInvoices) => [
+        ...currentInvoices,
+        ...result.invoices,
+      ]);
+      setNextCursor(result.nextCursor);
     });
   }
 
@@ -169,25 +184,23 @@ export function InvoiceListClient({ initialInvoices }: InvoiceListClientProps) {
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="grid gap-4 lg:grid-cols-[1fr_280px_280px]">
+        <form className="grid gap-4 lg:grid-cols-[1fr_240px_220px_auto]">
           <label className="relative block">
             <Search
               size={18}
               className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
             />
             <input
-              value={invoiceSearch}
-              onChange={(event) => setInvoiceSearch(event.target.value)}
+              name="q"
+              defaultValue={initialQuery}
               placeholder="Rechnung oder Kunde suchen..."
               className="h-10 w-full rounded-lg border border-slate-300 pl-10 pr-4 text-sm shadow-sm outline-none focus:border-slate-500"
             />
           </label>
 
           <select
-            value={statusFilter}
-            onChange={(event) =>
-              setStatusFilter(event.target.value as InvoiceStatus | "all")
-            }
+            name="status"
+            defaultValue={initialStatus}
             className="h-10 rounded-lg border border-slate-300 px-4 text-sm shadow-sm outline-none focus:border-slate-500"
           >
             <option value="all">Alle Status</option>
@@ -211,7 +224,13 @@ export function InvoiceListClient({ initialInvoices }: InvoiceListClientProps) {
             <option value="overdue">Überfällig</option>
             <option value="paid">Bezahlt</option>
           </select>
-        </div>
+          <button
+            type="submit"
+            className="h-10 rounded-md bg-slate-950 px-4 text-sm font-medium text-white"
+          >
+            Suchen
+          </button>
+        </form>
 
         <p className="mt-4 text-sm text-slate-600">
           {filteredInvoices.length} von {invoices.length} Rechnungen angezeigt.
@@ -219,6 +238,19 @@ export function InvoiceListClient({ initialInvoices }: InvoiceListClientProps) {
       </div>
 
       <InvoiceList invoices={filteredInvoices} />
+
+      {nextCursor ? (
+        <div className="mt-4 flex justify-center">
+          <button
+            type="button"
+            onClick={loadMoreInvoices}
+            disabled={isPending}
+            className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 disabled:opacity-60"
+          >
+            {isPending ? "Wird geladen..." : "Mehr laden"}
+          </button>
+        </div>
+      ) : null}
     </section>
   );
 }

@@ -16,6 +16,50 @@ export async function listInvoicesForUser(userId: string) {
   return invoices.map(toCanonicalInvoice);
 }
 
+type SearchInvoicesForUserInput = {
+  userId: string;
+  query?: string;
+  status?: string;
+  cursor?: string;
+  limit?: number;
+};
+
+export async function searchInvoicesForUser({
+  userId,
+  query,
+  status,
+  cursor,
+  limit = 25,
+}: SearchInvoicesForUserInput) {
+  const normalizedQuery = query?.trim();
+
+  const invoices = await prisma.invoice.findMany({
+    where: {
+      userId,
+      ...(status && status !== "all" ? { status } : {}),
+      ...(normalizedQuery
+        ? {
+            OR: [
+              { number: { contains: normalizedQuery, mode: "insensitive" } },
+              { buyerJson: { contains: normalizedQuery, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+    },
+    orderBy: [{ dueDate: "desc" }, { id: "asc" }],
+    take: limit + 1,
+    ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+  });
+
+  const hasNextPage = invoices.length > limit;
+  const pageItems = hasNextPage ? invoices.slice(0, limit) : invoices;
+
+  return {
+    invoices: pageItems.map(toCanonicalInvoice),
+    nextCursor: hasNextPage ? pageItems[pageItems.length - 1]?.id : undefined,
+  };
+}
+
 export async function getInvoiceForUser(userId: string, invoiceId: string) {
   const invoice = await prisma.invoice.findFirst({
     where: {
