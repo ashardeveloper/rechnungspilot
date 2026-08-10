@@ -5,28 +5,50 @@ import type { CanonicalInvoice } from "@/domain/invoice";
 import { formatCurrency, formatDate, formatUnit } from "./formatting";
 import { invoiceStatusLabels } from "./invoice-status";
 
-export function InvoicePreview({ invoice }: { invoice: CanonicalInvoice }) {
+type InvoicePreviewProps = {
+  invoice: CanonicalInvoice;
+  actions?: React.ReactNode;
+  eyebrow?: React.ReactNode;
+};
+
+export function InvoicePreview({
+  invoice,
+  actions,
+  eyebrow,
+}: InvoicePreviewProps) {
   return (
     <section className="mx-auto max-w-6xl px-6 pb-10">
       <div className="rounded-lg border border-slate-200 bg-white">
         <div className="grid gap-6 border-b border-slate-200 px-5 py-5 md:grid-cols-[1fr_auto]">
           <div>
-            <p className="text-sm font-medium text-cyan-700">
-              Rechnungsvorschau
-            </p>
+            {eyebrow ? (
+              <div className="mb-2">{eyebrow}</div>
+            ) : (
+              <p className="text-sm font-medium text-cyan-700">
+                Rechnungsvorschau
+              </p>
+            )}
+
             <h2 className="mt-1 text-xl font-semibold">{invoice.number}</h2>
             <p className="mt-2 text-sm text-slate-600">
               Ausgestellt am {formatDate(invoice.issueDate)} · fällig am{" "}
               {formatDate(invoice.dueDate)}
             </p>
           </div>
-          <div className="flex items-start gap-3 md:justify-end">
+
+          <div className="flex flex-wrap items-start justify-end gap-3">
+            {actions ? (
+              <div className="flex flex-wrap gap-2">{actions}</div>
+            ) : null}
+
             <span className="rounded-md border border-slate-200 px-2 py-1 text-xs font-medium">
               {invoiceStatusLabels[invoice.status]}
             </span>
+
             <span className="rounded-md bg-slate-950 px-3 py-1.5 text-sm font-medium text-white">
               {formatCurrency(invoice.totals.grossAmountCents)}
             </span>
+
             {invoice.status === "issued" || invoice.status === "paid" ? (
               <a
                 href={`/invoices/${invoice.id}/pdf`}
