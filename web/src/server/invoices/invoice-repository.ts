@@ -191,3 +191,12 @@ export async function restoreInvoiceForUser(userId: string, invoiceId: string) {
 
   return toCanonicalInvoice(restoredInvoice);
 }
+
+export async function countArchivedInvoicesForUser(userId: string) {
+  return prisma.invoice.count({
+    where: {
+      userId,
+      archivedAt: { not: null },
+    },
+  });
+}

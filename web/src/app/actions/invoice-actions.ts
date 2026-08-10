@@ -14,6 +14,7 @@ import {
   updateInvoiceForUser,
   listArchivedInvoicesForUser,
   restoreInvoiceForUser,
+  countArchivedInvoicesForUser,
 } from "@/server/invoices/invoice-repository";
 import { reserveNextInvoiceNumber } from "@/server/settings/invoice-number-settings-repository";
 import { createInvoiceAuditEvent } from "@/server/invoices/invoice-audit-repository";
@@ -149,4 +150,10 @@ export async function restoreInvoiceAction(invoiceId: string) {
   }
 
   return listArchivedInvoicesForUser(userId);
+}
+
+export async function countArchivedInvoicesAction() {
+  const userId = await getCurrentUserId();
+
+  return countArchivedInvoicesForUser(userId);
 }

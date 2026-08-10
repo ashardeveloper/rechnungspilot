@@ -29,6 +29,7 @@ type InvoiceListClientProps = {
   initialNextCursor?: string;
   initialQuery: string;
   initialStatus: InvoiceStatus | "all";
+  archivedCount: number;
 };
 
 export function InvoiceListClient({
@@ -36,6 +37,7 @@ export function InvoiceListClient({
   initialNextCursor,
   initialQuery,
   initialStatus,
+  archivedCount,
 }: InvoiceListClientProps) {
   const [invoices, setInvoices] = useState(initialInvoices);
   const [nextCursor, setNextCursor] = useState(initialNextCursor);
@@ -130,7 +132,7 @@ export function InvoiceListClient({
               href="/invoices/archived"
               className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
             >
-              Archiv
+              Archiv{archivedCount > 0 ? ` (${archivedCount})` : ""}
             </Link>
             <button
               type="button"
@@ -244,7 +246,35 @@ export function InvoiceListClient({
         </p>
       </div>
 
-      <InvoiceList invoices={filteredInvoices} />
+      {filteredInvoices.length > 0 ? (
+        <InvoiceList invoices={filteredInvoices} />
+      ) : (
+        <div className="rounded-xl border border-slate-200 bg-white px-6 py-10 text-center shadow-sm">
+          <h2 className="text-lg font-semibold">
+            Keine aktiven Rechnungen gefunden
+          </h2>
+          <p className="mt-2 text-sm text-slate-600">
+            Passe die Suche an, lege eine neue Rechnung an oder prüfe das
+            Archiv.
+          </p>
+          <div className="mt-4 flex justify-center gap-2">
+            <button
+              type="button"
+              onClick={createDraftInvoice}
+              disabled={isPending}
+              className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+            >
+              Neue Rechnung
+            </button>
+            <Link
+              href="/invoices/archived"
+              className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Archiv öffnen
+            </Link>
+          </div>
+        </div>
+      )}
 
       {nextCursor ? (
         <div className="mt-4 flex justify-center">

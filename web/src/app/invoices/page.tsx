@@ -3,11 +3,13 @@ import { redirect } from "next/navigation";
 import {
   listDemoInvoicesAction,
   searchInvoicesAction,
+  countArchivedInvoicesAction,
 } from "@/app/actions/invoice-actions";
 import { AppShell } from "@/components/layout/app-shell";
 import { auth } from "@/server/auth/auth";
 
 import { InvoiceListClient } from "./invoice-list-client";
+import type { InvoiceStatus } from "@/domain/invoice";
 
 export default async function InvoicesPage({
   searchParams,
@@ -23,10 +25,20 @@ export default async function InvoicesPage({
   await listDemoInvoicesAction();
 
   const params = await searchParams;
-  const result = await searchInvoicesAction({
-    query: params.q,
-    status: params.status,
-  });
+  const status =
+    params.status === "draft" ||
+    params.status === "review_ready" ||
+    params.status === "issued" ||
+    params.status === "paid"
+      ? params.status
+      : "all";
+  const [result, archivedCount] = await Promise.all([
+    searchInvoicesAction({
+      query: params.q,
+      status,
+    }),
+    countArchivedInvoicesAction(),
+  ]);
 
   return (
     <AppShell
@@ -39,7 +51,8 @@ export default async function InvoicesPage({
         initialInvoices={result.invoices}
         initialNextCursor={result.nextCursor}
         initialQuery={params.q ?? ""}
-        initialStatus={params.status ?? "all"}
+        initialStatus={status}
+        archivedCount={archivedCount}
       />
     </AppShell>
   );
