@@ -5,6 +5,7 @@ import type { CanonicalInvoice } from "@/domain/invoice";
 import { getCurrentUserId } from "@/server/auth/current-user";
 import { seedDemoInvoices } from "@/server/demo/seed-demo-invoices";
 import {
+  archiveInvoiceForUser,
   createInvoiceForUser,
   deleteInvoicesForUser,
   listInvoicesForUser,
@@ -92,6 +93,25 @@ export async function updateInvoiceAction(invoice: CanonicalInvoice) {
       existingInvoice && existingInvoice.status !== invoice.status
         ? `Status geändert: ${existingInvoice.status} -> ${invoice.status}.`
         : `Rechnung ${invoice.number} wurde aktualisiert.`,
+  });
+
+  return listInvoicesForUser(userId);
+}
+
+export async function archiveInvoiceAction(invoiceId: string) {
+  const userId = await getCurrentUserId();
+
+  const archivedInvoice = await archiveInvoiceForUser(userId, invoiceId);
+
+  if (!archivedInvoice) {
+    throw new Error("Invoice not found.");
+  }
+
+  await createInvoiceAuditEvent({
+    invoiceId,
+    userId,
+    type: "archived",
+    message: `Rechnung ${archivedInvoice.number} wurde archiviert.`,
   });
 
   return listInvoicesForUser(userId);

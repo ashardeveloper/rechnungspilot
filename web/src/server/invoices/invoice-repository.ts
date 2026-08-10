@@ -9,7 +9,7 @@ import {
 
 export async function listInvoicesForUser(userId: string) {
   const invoices = await prisma.invoice.findMany({
-    where: { userId },
+    where: { userId, archivedAt: null },
     orderBy: { createdAt: "desc" },
   });
 
@@ -36,6 +36,7 @@ export async function searchInvoicesForUser({
   const invoices = await prisma.invoice.findMany({
     where: {
       userId,
+      archivedAt: null,
       ...(status && status !== "all" ? { status } : {}),
       ...(normalizedQuery
         ? {
@@ -65,6 +66,7 @@ export async function getInvoiceForUser(userId: string, invoiceId: string) {
     where: {
       id: invoiceId,
       userId,
+      archivedAt: null,
     },
   });
 
@@ -89,6 +91,7 @@ export async function updateInvoiceForUser(
     where: {
       id: invoice.id,
       userId,
+      archivedAt: null,
     },
   });
 
@@ -106,6 +109,31 @@ export async function updateInvoiceForUser(
   return toCanonicalInvoice(savedInvoice);
 }
 
+export async function archiveInvoiceForUser(userId: string, invoiceId: string) {
+  const invoice = await prisma.invoice.findFirst({
+    where: {
+      id: invoiceId,
+      userId,
+      archivedAt: null,
+    },
+  });
+
+  if (!invoice) {
+    return null;
+  }
+
+  if (invoice.status === "issued" || invoice.status === "paid") {
+    throw new Error("Issued or paid invoices cannot be archived.");
+  }
+
+  const archivedInvoice = await prisma.invoice.update({
+    where: { id: invoice.id },
+    data: { archivedAt: new Date() },
+  });
+
+  return toCanonicalInvoice(archivedInvoice);
+}
+
 export async function upsertInvoiceForUser(
   userId: string,
   invoice: CanonicalInvoice,
@@ -114,6 +142,7 @@ export async function upsertInvoiceForUser(
     where: {
       id: invoice.id,
       userId,
+      archivedAt: null,
     },
   });
 

@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 
 import { listInvoiceAuditEventsAction } from "@/app/actions/invoice-audit-actions";
-import { updateInvoiceAction } from "@/app/actions/invoice-actions";
+import {
+  updateInvoiceAction,
+  archiveInvoiceAction,
+} from "@/app/actions/invoice-actions";
 import { InvoiceEditor } from "@/components/invoices/invoice-editor";
 import { InvoicePreview } from "@/components/invoices/invoice-preview";
 import type { Customer } from "@/domain/customer";
@@ -14,6 +17,7 @@ import {
   getInvoiceStatusTransitions,
   transitionInvoiceStatus,
 } from "@/domain/invoice-lifecycle";
+import { useRouter } from "next/navigation";
 
 type InvoiceDetailClientProps = {
   invoice: CanonicalInvoice;
@@ -30,6 +34,7 @@ export function InvoiceDetailClient({
   const [isAuditOpen, setIsAuditOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [hasLoadedAuditEvents, setHasLoadedAuditEvents] = useState(false);
+  const router = useRouter();
 
   const isLocked =
     currentInvoice.status === "issued" || currentInvoice.status === "paid";
@@ -72,6 +77,17 @@ export function InvoiceDetailClient({
     }
   }
 
+  function archiveInvoice() {
+    if (!window.confirm("Diese Rechnung wirklich archivieren?")) {
+      return;
+    }
+
+    startTransition(async () => {
+      await archiveInvoiceAction(currentInvoice.id);
+      router.push("/invoices");
+    });
+  }
+
   return (
     <>
       <InvoicePreview
@@ -93,6 +109,17 @@ export function InvoiceDetailClient({
                 className="rounded-md bg-slate-950 px-3 py-1.5 text-sm font-medium text-white"
               >
                 {isEditing ? "Bearbeitung schließen" : "Bearbeiten"}
+              </button>
+            ) : null}
+
+            {!isLocked ? (
+              <button
+                type="button"
+                onClick={archiveInvoice}
+                disabled={isPending}
+                className="rounded-md border border-red-200 bg-white px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+              >
+                Archivieren
               </button>
             ) : null}
 
