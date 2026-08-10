@@ -12,6 +12,8 @@ import {
   searchInvoicesForUser,
   getInvoiceForUser,
   updateInvoiceForUser,
+  listArchivedInvoicesForUser,
+  restoreInvoiceForUser,
 } from "@/server/invoices/invoice-repository";
 import { reserveNextInvoiceNumber } from "@/server/settings/invoice-number-settings-repository";
 import { createInvoiceAuditEvent } from "@/server/invoices/invoice-audit-repository";
@@ -124,4 +126,27 @@ export async function resetDemoInvoicesAction() {
   await seedDemoInvoices();
 
   return listInvoicesForUser(userId);
+}
+
+export async function listArchivedInvoicesAction() {
+  const userId = await getCurrentUserId();
+
+  return listArchivedInvoicesForUser(userId);
+}
+
+export async function restoreInvoiceAction(invoiceId: string) {
+  const userId = await getCurrentUserId();
+
+  const invoice = await restoreInvoiceForUser(userId, invoiceId);
+
+  if (invoice) {
+    await createInvoiceAuditEvent({
+      invoiceId,
+      userId,
+      type: "updated",
+      message: `Rechnung ${invoice.number} wurde wiederhergestellt.`,
+    });
+  }
+
+  return listArchivedInvoicesForUser(userId);
 }

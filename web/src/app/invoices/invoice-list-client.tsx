@@ -22,6 +22,7 @@ import {
 import { InvoiceList } from "@/components/invoices/invoice-list";
 import type { CanonicalInvoice, InvoiceStatus } from "@/domain/invoice";
 import { getInvoiceDueStatus } from "@/domain/invoice-due-status";
+import Link from "next/link";
 
 type InvoiceListClientProps = {
   initialInvoices: CanonicalInvoice[];
@@ -125,6 +126,12 @@ export function InvoiceListClient({
               <RefreshCw size={16} />
               Beispieldaten zurücksetzen
             </button>
+            <Link
+              href="/invoices/archived"
+              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+            >
+              Archiv
+            </Link>
             <button
               type="button"
               onClick={createDraftInvoice}

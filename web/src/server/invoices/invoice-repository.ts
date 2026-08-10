@@ -158,3 +158,36 @@ export async function deleteInvoicesForUser(userId: string) {
     where: { userId },
   });
 }
+
+export async function listArchivedInvoicesForUser(userId: string) {
+  const invoices = await prisma.invoice.findMany({
+    where: {
+      userId,
+      archivedAt: { not: null },
+    },
+    orderBy: [{ updatedAt: "desc" }, { id: "asc" }],
+  });
+
+  return invoices.map(toCanonicalInvoice);
+}
+
+export async function restoreInvoiceForUser(userId: string, invoiceId: string) {
+  const invoice = await prisma.invoice.findFirst({
+    where: {
+      id: invoiceId,
+      userId,
+      archivedAt: { not: null },
+    },
+  });
+
+  if (!invoice) {
+    return null;
+  }
+
+  const restoredInvoice = await prisma.invoice.update({
+    where: { id: invoice.id },
+    data: { archivedAt: null },
+  });
+
+  return toCanonicalInvoice(restoredInvoice);
+}
