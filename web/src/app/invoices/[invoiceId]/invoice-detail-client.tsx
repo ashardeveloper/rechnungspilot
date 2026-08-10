@@ -27,6 +27,7 @@ export function InvoiceDetailClient({
   const [currentInvoice, setCurrentInvoice] = useState(invoice);
   const [auditEvents, setAuditEvents] = useState<InvoiceAuditEvent[]>([]);
   const [isEditing, setIsEditing] = useState(false);
+  const [isAuditOpen, setIsAuditOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const isLocked =
@@ -133,7 +134,57 @@ export function InvoiceDetailClient({
       ) : null}
 
       <section className="mx-auto max-w-6xl px-6 pb-10 print:hidden">
-        ...
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <button
+            type="button"
+            onClick={() => setIsAuditOpen((current) => !current)}
+            className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left hover:bg-slate-50"
+          >
+            <div>
+              <h2 className="text-base font-semibold">Historie</h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Technische Ereignisse zu Erstellung, Änderungen, Statuswechseln
+                und PDF-Downloads.
+              </p>
+            </div>
+
+            <span className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700">
+              {isAuditOpen ? "Historie ausblenden" : "Historie anzeigen"}
+            </span>
+          </button>
+
+          {isAuditOpen ? (
+            <div className="border-t border-slate-200">
+              {auditEvents.length > 0 ? (
+                <div className="divide-y divide-slate-200">
+                  {auditEvents.map((event) => (
+                    <div
+                      key={event.id}
+                      className="flex gap-3 px-5 py-4 text-sm"
+                    >
+                      <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-cyan-600" />
+                      <div>
+                        <p className="font-medium text-slate-950">
+                          {event.message}
+                        </p>
+                        <p className="mt-1 text-slate-500">
+                          {new Intl.DateTimeFormat("de-DE", {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          }).format(new Date(event.createdAt))}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="px-5 py-4 text-sm text-slate-600">
+                  Noch keine Historie für diese Rechnung vorhanden.
+                </div>
+              )}
+            </div>
+          ) : null}
+        </div>
       </section>
     </>
   );
