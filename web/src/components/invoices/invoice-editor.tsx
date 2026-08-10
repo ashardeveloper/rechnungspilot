@@ -4,7 +4,7 @@ import { calculateInvoiceTotals } from "@/domain/invoice-calculations";
 import type { CanonicalInvoice } from "@/domain/invoice";
 import { validateInvoice } from "@/domain/invoice-validation";
 import { customerToInvoiceParty, type Customer } from "@/domain/customer";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 type InvoiceEditorProps = {
   invoice: CanonicalInvoice;

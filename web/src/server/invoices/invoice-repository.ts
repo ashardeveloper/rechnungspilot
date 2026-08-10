@@ -16,6 +16,16 @@ export async function listInvoicesForUser(userId: string) {
   return invoices.map(toCanonicalInvoice);
 }
 
+export async function getInvoiceForUser(userId: string, invoiceId: string) {
+  const invoice = await prisma.invoice.findFirst({
+    where: {
+      id: invoiceId,
+      userId,
+    },
+  });
+
+  return invoice ? toCanonicalInvoice(invoice) : null;
+}
 export async function createInvoiceForUser(
   userId: string,
   invoice: CanonicalInvoice,

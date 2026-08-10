@@ -8,6 +8,7 @@ import {
   createInvoiceForUser,
   deleteInvoicesForUser,
   listInvoicesForUser,
+  getInvoiceForUser,
   updateInvoiceForUser,
 } from "@/server/invoices/invoice-repository";
 import { reserveNextInvoiceNumber } from "@/server/settings/invoice-number-settings-repository";
@@ -26,6 +27,12 @@ export async function listDemoInvoicesAction() {
   await seedDemoInvoices();
 
   return listInvoicesForUser(userId);
+}
+
+export async function getInvoiceAction(invoiceId: string) {
+  const userId = await getCurrentUserId();
+
+  return getInvoiceForUser(userId, invoiceId);
 }
 
 export async function createDraftInvoiceAction() {

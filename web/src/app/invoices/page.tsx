@@ -1,11 +1,10 @@
 import { redirect } from "next/navigation";
 
 import { listDemoInvoicesAction } from "@/app/actions/invoice-actions";
+import { AppShell } from "@/components/layout/app-shell";
 import { auth } from "@/server/auth/auth";
 
-import { InvoiceWorkspaceClient } from "./invoice-workspace-client";
-import { listCustomersAction } from "@/app/actions/customer-actions";
-import { AppShell } from "@/components/layout/app-shell";
+import { InvoiceListClient } from "./invoice-list-client";
 
 export default async function InvoicesPage() {
   const session = await auth();
@@ -14,23 +13,16 @@ export default async function InvoicesPage() {
     redirect("/login");
   }
 
-  const [invoices, customers] = await Promise.all([
-    listDemoInvoicesAction(),
-    listCustomersAction(),
-  ]);
+  const invoices = await listDemoInvoicesAction();
 
   return (
     <AppShell
       title="Rechnungen"
-      description="Rechnungen erstellen, prüfen, ausstellen und als PDF herunterladen."
+      description="Rechnungen suchen, prüfen und öffnen."
       userEmail={session.user.email ?? "Angemeldeter Nutzer"}
       activePath="/invoices"
     >
-      <InvoiceWorkspaceClient
-        initialInvoices={invoices}
-        customers={customers}
-        userEmail={session.user.email ?? "Angemeldeter Nutzer"}
-      />
+      <InvoiceListClient initialInvoices={invoices} />
     </AppShell>
   );
 }

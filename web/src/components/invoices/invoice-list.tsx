@@ -6,18 +6,13 @@ import {
   getInvoiceDueStatus,
   getInvoiceDueStatusLabel,
 } from "@/domain/invoice-due-status";
+import Link from "next/link";
 
 type InvoiceListProps = {
   invoices: CanonicalInvoice[];
-  selectedInvoiceId: string;
-  onSelectInvoice: (invoiceId: string) => void;
 };
 
-export function InvoiceList({
-  invoices,
-  selectedInvoiceId,
-  onSelectInvoice,
-}: InvoiceListProps) {
+export function InvoiceList({ invoices }: InvoiceListProps) {
   return (
     <div className="rounded-lg border border-slate-200 bg-white">
       <div className="border-b border-slate-200 px-5 py-4">
@@ -35,17 +30,13 @@ export function InvoiceList({
           </div>
         ) : null}
         {invoices.map((invoice) => {
-          const isSelected = invoice.id === selectedInvoiceId;
           const dueStatus = getInvoiceDueStatus(invoice);
 
           return (
-            <button
+            <Link
               key={invoice.id}
-              type="button"
-              onClick={() => onSelectInvoice(invoice.id)}
-              className={`grid w-full gap-3 px-5 py-4 text-left transition sm:grid-cols-[1fr_auto] ${
-                isSelected ? "bg-cyan-50" : "hover:bg-slate-50"
-              }`}
+              href={`/invoices/${invoice.id}`}
+              className="grid w-full gap-3 px-5 py-4 text-left transition hover:bg-slate-50 sm:grid-cols-[1fr_auto]"
             >
               <div>
                 <p className="font-medium">{invoice.number}</p>
@@ -65,7 +56,7 @@ export function InvoiceList({
                   {invoiceStatusLabels[invoice.status]}
                 </span>
               </div>
-            </button>
+            </Link>
           );
         })}
       </div>
