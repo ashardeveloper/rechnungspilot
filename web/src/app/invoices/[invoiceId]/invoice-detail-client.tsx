@@ -75,7 +75,7 @@ export function InvoiceDetailClient({
             href="/invoices"
             className="text-sm font-medium text-cyan-700 hover:text-cyan-900"
           >
-            Zurück zur Rechnungsübersicht
+            ← Zurück zur Rechnungsübersicht
           </Link>
         }
         actions={
@@ -99,7 +99,7 @@ export function InvoiceDetailClient({
                 title={transition.blockedReason}
                 className={
                   transition.targetStatus === "paid"
-                    ? "rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+                    ? "rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
                     : "rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
                 }
               >
