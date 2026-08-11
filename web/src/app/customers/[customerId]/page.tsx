@@ -172,7 +172,7 @@ export default async function CustomerDetailPage({
                   Kunde bearbeiten
                 </Link>
                 <Link
-                  href="/invoices"
+                  href={`/invoices/new?customerId=${customer.id}`}
                   className="inline-flex items-center gap-2 rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800"
                 >
                   <Plus size={16} />
@@ -543,7 +543,7 @@ export default async function CustomerDetailPage({
               </div>
               <div className="space-y-4 px-5 py-5 text-sm">
                 <Link
-                  href="/invoices"
+                  href={`/invoices/new?customerId=${customer.id}`}
                   className="flex items-start gap-3 hover:text-blue-700"
                 >
                   <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
