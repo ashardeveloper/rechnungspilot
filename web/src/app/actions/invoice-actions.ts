@@ -40,7 +40,11 @@ export async function listDemoInvoicesAction() {
 export async function getInvoiceDashboardAction() {
   const userId = await getCurrentUserId();
 
-  await seedDemoInvoices();
+  const existingInvoices = await listInvoicesForUser(userId);
+
+  if (existingInvoices.length === 0) {
+    await seedDemoInvoices();
+  }
 
   const invoices = await listInvoicesForUser(userId);
   const archivedCount = await countArchivedInvoicesForUser(userId);
