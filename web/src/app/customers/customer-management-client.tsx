@@ -83,10 +83,7 @@ export function CustomerManagementClient({
         {customers.map((customer) => (
           <Link
             key={customer.id}
-            href={`/customers?${new URLSearchParams({
-              ...(initialQuery ? { q: initialQuery } : {}),
-              selected: customer.id,
-            })}`}
+            href={`/customers/${customer.id}`}
             className="grid gap-2 px-5 py-4 text-sm hover:bg-cyan-50 sm:grid-cols-[1fr_1fr_auto]"
           >
             <div>

@@ -139,3 +139,14 @@ export async function searchCustomersForUser({
     nextCursor: customers.length > limit ? page.at(-1)?.id : undefined,
   };
 }
+
+export async function getCustomerForUser(userId: string, customerId: string) {
+  const customer = await prisma.customer.findFirst({
+    where: {
+      id: customerId,
+      userId,
+    },
+  });
+
+  return customer ? toCustomer(customer) : null;
+}

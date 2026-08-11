@@ -10,6 +10,7 @@ import {
   searchCustomersForUser,
   upsertCustomerForUser,
   updateCustomerForUser,
+  getCustomerForUser,
 } from "@/server/customers/customer-repository";
 
 export async function listCustomersAction() {
@@ -91,4 +92,10 @@ export async function searchCustomersAction({
     cursor,
     limit: 25,
   });
+}
+
+export async function getCustomerAction(customerId: string) {
+  const userId = await getCurrentUserId();
+
+  return getCustomerForUser(userId, customerId);
 }
