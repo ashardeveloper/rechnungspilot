@@ -22,6 +22,10 @@ import {
 import { reserveNextInvoiceNumber } from "@/server/settings/invoice-number-settings-repository";
 import { createInvoiceAuditEvent } from "@/server/invoices/invoice-audit-repository";
 import { getBusinessProfileForUser } from "@/server/settings/business-profile-repository";
+import { redirect } from "next/navigation";
+import { calculateInvoiceTotals } from "@/domain/invoice-calculations";
+import type { InvoiceLineItem, InvoiceStatus } from "@/domain/invoice";
+import { getCustomerForUser } from "@/server/customers/customer-repository";
 
 export async function listDemoInvoicesAction() {
   const userId = await getCurrentUserId();
@@ -210,4 +214,82 @@ export async function copyInvoiceAsDraftAction(invoiceId: string) {
   });
 
   return draftInvoice;
+}
+
+export async function createInvoiceFromFormAction(formData: FormData) {
+  const userId = await getCurrentUserId();
+
+  const customerId = String(formData.get("customerId") ?? "");
+  const customer = await getCustomerForUser(userId, customerId);
+
+  if (!customer) {
+    throw new Error("Customer is required.");
+  }
+
+  const seller = await getBusinessProfileForUser(userId);
+  const invoiceNumber = await reserveNextInvoiceNumber(userId);
+
+  const descriptions = formData.getAll("description").map(String);
+  const quantities = formData.getAll("quantity").map(Number);
+  const units = formData.getAll("unit").map(String);
+  const unitPrices = formData.getAll("unitPrice").map(String);
+  const vatRates = formData.getAll("vatRate").map(Number);
+
+  const lineItems: InvoiceLineItem[] = descriptions
+    .map((description, index) => ({
+      description: description.trim(),
+      quantity: quantities[index] || 0,
+      unit:
+        units[index] === "day" || units[index] === "piece"
+          ? units[index]
+          : "hour",
+      unitPriceCents: Math.round(
+        Number(unitPrices[index]?.replace(",", ".") || 0) * 100,
+      ),
+      vatCategory: vatRates[index] === 0 ? "exempt" : "standard",
+      vatRatePercent:
+        vatRates[index] === 7 ? 7 : vatRates[index] === 0 ? 0 : 19,
+    }))
+    .filter((item) => item.description && item.quantity > 0);
+
+  if (lineItems.length === 0) {
+    throw new Error("At least one line item is required.");
+  }
+
+  const intent = String(formData.get("intent") ?? "draft");
+  const status: InvoiceStatus =
+    intent === "review_ready" ? "review_ready" : "draft";
+
+  const invoice = {
+    id: `inv_${crypto.randomUUID()}`,
+    number: invoiceNumber,
+    status,
+    issueDate: String(formData.get("issueDate") ?? ""),
+    dueDate: String(formData.get("dueDate") ?? ""),
+    currency: "EUR" as const,
+    seller,
+    buyer: {
+      name: customer.name,
+      street: customer.street,
+      postalCode: customer.postalCode,
+      city: customer.city,
+      countryCode: "DE" as const,
+      vatId: customer.vatId,
+      taxNumber: customer.taxNumber,
+    },
+    lineItems,
+    totals: calculateInvoiceTotals(lineItems),
+    notes: String(formData.get("notes") ?? "").trim() || undefined,
+  };
+
+  await createInvoiceForUser(userId, invoice);
+
+  await createInvoiceAuditEvent({
+    invoiceId: invoice.id,
+    userId,
+    type: "created",
+    message: `Rechnung ${invoice.number} wurde erstellt.`,
+  });
+
+  redirect(`/invoices/${invoice.id}`);
 }

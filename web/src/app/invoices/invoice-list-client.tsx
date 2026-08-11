@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 
 import {
-  createDraftInvoiceAction,
   resetDemoInvoicesAction,
   searchInvoicesAction,
 } from "@/app/actions/invoice-actions";
@@ -75,12 +74,6 @@ export function InvoiceListClient({
     });
   }, [invoices, dueFilter]);
 
-  function createDraftInvoice() {
-    startTransition(async () => {
-      setInvoices(await createDraftInvoiceAction());
-    });
-  }
-
   function resetDemoData() {
     startTransition(async () => {
       setInvoices(await resetDemoInvoicesAction());
@@ -134,15 +127,12 @@ export function InvoiceListClient({
             >
               Archiv{archivedCount > 0 ? ` (${archivedCount})` : ""}
             </Link>
-            <button
-              type="button"
-              onClick={createDraftInvoice}
-              disabled={isPending}
-              className="inline-flex items-center gap-2 rounded-md bg-slate-950 px-3 py-2 text-sm font-medium text-white shadow-sm disabled:opacity-60"
+            <Link
+              href="/invoices/new"
+              className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white"
             >
-              <Plus size={16} />
               Neue Rechnung
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -258,14 +248,13 @@ export function InvoiceListClient({
             Archiv.
           </p>
           <div className="mt-4 flex justify-center gap-2">
-            <button
-              type="button"
-              onClick={createDraftInvoice}
-              disabled={isPending}
-              className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+            <Link
+              href="/invoices/new"
+              className="inline-flex items-center gap-2 rounded-md bg-slate-950 px-3 py-2 text-sm font-medium text-white shadow-sm"
             >
+              <Plus size={16} />
               Neue Rechnung
-            </button>
+            </Link>
             <Link
               href="/invoices/archived"
               className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"

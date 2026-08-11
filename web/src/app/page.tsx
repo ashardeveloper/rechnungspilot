@@ -67,7 +67,7 @@ export default async function HomePage() {
           <div />
           <div className="flex flex-wrap gap-2">
             <Link
-              href="/invoices"
+              href="/invoices/new"
               className="inline-flex items-center gap-2 rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white shadow-sm"
             >
               <Plus size={16} />
@@ -211,7 +211,7 @@ export default async function HomePage() {
           >
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <QuickAction
-                href="/invoices"
+                href="/invoices/new"
                 icon={<FilePlus2 size={22} />}
                 label="Neue Rechnung"
                 subline="erstellen"
