@@ -1,6 +1,9 @@
 "use server";
 
-import { createDraftInvoice } from "@/domain/invoice-factory";
+import {
+  createDraftInvoice,
+  copyInvoiceAsDraft,
+} from "@/domain/invoice-factory";
 import type { CanonicalInvoice } from "@/domain/invoice";
 import { getCurrentUserId } from "@/server/auth/current-user";
 import { seedDemoInvoices } from "@/server/demo/seed-demo-invoices";
@@ -156,4 +159,28 @@ export async function countArchivedInvoicesAction() {
   const userId = await getCurrentUserId();
 
   return countArchivedInvoicesForUser(userId);
+}
+
+export async function copyInvoiceAsDraftAction(invoiceId: string) {
+  const userId = await getCurrentUserId();
+
+  const sourceInvoice = await getInvoiceForUser(userId, invoiceId);
+
+  if (!sourceInvoice) {
+    throw new Error("Invoice not found.");
+  }
+
+  const invoiceNumber = await reserveNextInvoiceNumber(userId);
+  const draftInvoice = copyInvoiceAsDraft(sourceInvoice, invoiceNumber);
+
+  await createInvoiceForUser(userId, draftInvoice);
+
+  await createInvoiceAuditEvent({
+    invoiceId: draftInvoice.id,
+    userId,
+    type: "created",
+    message: `Rechnung ${draftInvoice.number} wurde aus ${sourceInvoice.number} kopiert.`,
+  });
+
+  return draftInvoice;
 }

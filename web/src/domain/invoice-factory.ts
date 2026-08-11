@@ -71,3 +71,21 @@ export function createDraftInvoice(
     totals: calculateInvoiceTotals(lineItems),
   };
 }
+
+export function copyInvoiceAsDraft(
+  sourceInvoice: CanonicalInvoice,
+  invoiceNumber: string,
+): CanonicalInvoice {
+  const today = new Date();
+  const dueDate = new Date(today);
+  dueDate.setDate(today.getDate() + 14);
+
+  return {
+    ...sourceInvoice,
+    id: `inv_${crypto.randomUUID()}`,
+    number: invoiceNumber,
+    status: "draft",
+    issueDate: today.toISOString().slice(0, 10),
+    dueDate: dueDate.toISOString().slice(0, 10),
+  };
+}

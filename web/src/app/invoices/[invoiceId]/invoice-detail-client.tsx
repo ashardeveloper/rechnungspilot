@@ -7,6 +7,7 @@ import { listInvoiceAuditEventsAction } from "@/app/actions/invoice-audit-action
 import {
   updateInvoiceAction,
   archiveInvoiceAction,
+  copyInvoiceAsDraftAction,
 } from "@/app/actions/invoice-actions";
 import { InvoiceEditor } from "@/components/invoices/invoice-editor";
 import { InvoicePreview } from "@/components/invoices/invoice-preview";
@@ -88,6 +89,13 @@ export function InvoiceDetailClient({
     });
   }
 
+  function copyAsNewInvoice() {
+    startTransition(async () => {
+      const copiedInvoice = await copyInvoiceAsDraftAction(currentInvoice.id);
+      router.push(`/invoices/${copiedInvoice.id}`);
+    });
+  }
+
   return (
     <>
       <InvoicePreview
@@ -111,6 +119,15 @@ export function InvoiceDetailClient({
                 {isEditing ? "Bearbeitung schließen" : "Bearbeiten"}
               </button>
             ) : null}
+
+            <button
+              type="button"
+              onClick={copyAsNewInvoice}
+              disabled={isPending}
+              className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            >
+              Als neue Rechnung kopieren
+            </button>
 
             {!isLocked ? (
               <button
