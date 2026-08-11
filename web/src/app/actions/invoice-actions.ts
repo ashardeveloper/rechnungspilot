@@ -37,6 +37,29 @@ export async function listDemoInvoicesAction() {
   return listInvoicesForUser(userId);
 }
 
+export async function getInvoiceDashboardAction() {
+  const userId = await getCurrentUserId();
+
+  await seedDemoInvoices();
+
+  const invoices = await listInvoicesForUser(userId);
+  const archivedCount = await countArchivedInvoicesForUser(userId);
+
+  return {
+    invoices: invoices.slice(0, 5),
+    archivedCount,
+    stats: {
+      total: invoices.length,
+      draft: invoices.filter((invoice) => invoice.status === "draft").length,
+      reviewReady: invoices.filter(
+        (invoice) => invoice.status === "review_ready",
+      ).length,
+      issued: invoices.filter((invoice) => invoice.status === "issued").length,
+      paid: invoices.filter((invoice) => invoice.status === "paid").length,
+    },
+  };
+}
+
 export async function searchInvoicesAction(input: {
   query?: string;
   status?: string;
