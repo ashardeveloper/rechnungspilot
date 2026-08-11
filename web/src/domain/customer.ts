@@ -3,12 +3,19 @@ import type { InvoiceParty } from "./invoice";
 export type Customer = {
   id: string;
   name: string;
+  contactName?: string;
+  email?: string;
+  phone?: string;
   street: string;
   postalCode: string;
   city: string;
   countryCode: "DE";
   vatId?: string;
   taxNumber?: string;
+  paymentTermsDays: number;
+  defaultVatRatePercent: number;
+  defaultCurrency: "EUR";
+  internalNotes?: string;
 };
 
 export function customerToInvoiceParty(customer: Customer): InvoiceParty {

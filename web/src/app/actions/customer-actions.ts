@@ -33,12 +33,20 @@ export async function createCustomerAction(formData: FormData) {
   const customer: Customer = {
     id: `customer_${crypto.randomUUID()}`,
     name: String(formData.get("name") ?? "").trim(),
+    contactName: String(formData.get("contactName") ?? "").trim() || undefined,
+    email: String(formData.get("email") ?? "").trim() || undefined,
+    phone: String(formData.get("phone") ?? "").trim() || undefined,
     street: String(formData.get("street") ?? "").trim(),
     postalCode: String(formData.get("postalCode") ?? "").trim(),
     city: String(formData.get("city") ?? "").trim(),
     countryCode: "DE",
     vatId: String(formData.get("vatId") ?? "").trim() || undefined,
     taxNumber: String(formData.get("taxNumber") ?? "").trim() || undefined,
+    paymentTermsDays: Number(formData.get("paymentTermsDays") ?? 14),
+    defaultVatRatePercent: Number(formData.get("defaultVatRatePercent") ?? 19),
+    defaultCurrency: "EUR",
+    internalNotes:
+      String(formData.get("internalNotes") ?? "").trim() || undefined,
   };
 
   await upsertCustomerForUser(userId, customer);
@@ -52,12 +60,20 @@ export async function updateCustomerAction(formData: FormData) {
   await updateCustomerForUser(userId, {
     id: String(formData.get("id") ?? ""),
     name: String(formData.get("name") ?? "").trim(),
+    contactName: String(formData.get("contactName") ?? "").trim() || undefined,
+    email: String(formData.get("email") ?? "").trim() || undefined,
+    phone: String(formData.get("phone") ?? "").trim() || undefined,
     street: String(formData.get("street") ?? "").trim(),
     postalCode: String(formData.get("postalCode") ?? "").trim(),
     city: String(formData.get("city") ?? "").trim(),
     countryCode: "DE",
     vatId: String(formData.get("vatId") ?? "").trim() || undefined,
     taxNumber: String(formData.get("taxNumber") ?? "").trim() || undefined,
+    paymentTermsDays: Number(formData.get("paymentTermsDays") ?? 14),
+    defaultVatRatePercent: Number(formData.get("defaultVatRatePercent") ?? 19),
+    defaultCurrency: "EUR",
+    internalNotes:
+      String(formData.get("internalNotes") ?? "").trim() || undefined,
   });
 
   revalidatePath("/customers");

@@ -4,22 +4,36 @@ import { prisma } from "@/server/db/prisma";
 function toCustomer(customer: {
   id: string;
   name: string;
+  contactName: string | null;
+  email: string | null;
+  phone: string | null;
   street: string;
   postalCode: string;
   city: string;
   countryCode: string;
   vatId: string | null;
   taxNumber: string | null;
+  paymentTermsDays: number;
+  defaultVatRatePercent: number;
+  defaultCurrency: string;
+  internalNotes: string | null;
 }): Customer {
   return {
     id: customer.id,
     name: customer.name,
+    contactName: customer.contactName ?? undefined,
+    email: customer.email ?? undefined,
+    phone: customer.phone ?? undefined,
     street: customer.street,
     postalCode: customer.postalCode,
     city: customer.city,
     countryCode: "DE",
     vatId: customer.vatId ?? undefined,
     taxNumber: customer.taxNumber ?? undefined,
+    paymentTermsDays: customer.paymentTermsDays,
+    defaultVatRatePercent: customer.defaultVatRatePercent,
+    defaultCurrency: "EUR",
+    internalNotes: customer.internalNotes ?? undefined,
   };
 }
 
@@ -123,6 +137,8 @@ export async function searchCustomersForUser({
               { name: { contains: normalizedQuery } },
               { city: { contains: normalizedQuery } },
               { street: { contains: normalizedQuery } },
+              { contactName: { contains: normalizedQuery } },
+              { email: { contains: normalizedQuery } },
             ],
           }
         : {}),
