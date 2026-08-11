@@ -15,20 +15,18 @@ import {
 import { createCustomerAndRedirectAction } from "@/app/actions/customer-actions";
 
 export function NewCustomerClient() {
-  const [name, setName] = useState("Atelier Nord GmbH");
-  const [contactName, setContactName] = useState("Max Mustermann");
-  const [email, setEmail] = useState("info@atelier-nord.de");
-  const [phone, setPhone] = useState("+49 40 12345678");
-  const [street, setStreet] = useState("Kanalstrasse 19");
-  const [postalCode, setPostalCode] = useState("20359");
-  const [city, setCity] = useState("Hamburg");
-  const [vatId, setVatId] = useState("DE123456789");
-  const [taxNumber, setTaxNumber] = useState("17/123/45678");
+  const [name, setName] = useState("");
+  const [contactName, setContactName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [street, setStreet] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [city, setCity] = useState("");
+  const [vatId, setVatId] = useState("");
+  const [taxNumber, setTaxNumber] = useState("");
   const [paymentTermsDays, setPaymentTermsDays] = useState("14");
   const [defaultVatRatePercent, setDefaultVatRatePercent] = useState("19");
-  const [internalNotes, setInternalNotes] = useState(
-    "Bevorzugt PDF per E-Mail.\nAnsprechpartner ist Herr Max Mustermann.",
-  );
+  const [internalNotes, setInternalNotes] = useState("");
 
   const requiredFieldsComplete = Boolean(
     name.trim() && street.trim() && postalCode.trim() && city.trim(),

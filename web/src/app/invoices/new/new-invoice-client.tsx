@@ -50,16 +50,16 @@ export function NewInvoiceClient({
     initialCustomerId &&
       customers.some((customer) => customer.id === initialCustomerId)
       ? initialCustomerId
-      : (customers[0]?.id ?? ""),
+      : "",
   );
   const [isCustomerPickerOpen, setIsCustomerPickerOpen] = useState(false);
   const [lineItems, setLineItems] = useState<DraftLineItem[]>([
     {
       id: crypto.randomUUID(),
-      description: "Beratung und Umsetzung",
-      quantity: 6,
+      description: "",
+      quantity: 1,
       unit: "hour",
-      unitPrice: "200,00",
+      unitPrice: "",
       vatRate: 19,
     },
   ]);
@@ -103,6 +103,15 @@ export function NewInvoiceClient({
     };
   }, [lineItems]);
 
+  const hasValidLineItem = lineItems.some(
+    (item) =>
+      item.description.trim() &&
+      item.quantity > 0 &&
+      centsFromPrice(item.unitPrice) > 0,
+  );
+
+  const canSubmit = Boolean(selectedCustomer && hasValidLineItem);
+
   function updateLineItem(id: string, patch: Partial<DraftLineItem>) {
     setLineItems((currentItems) =>
       currentItems.map((item) =>
@@ -119,7 +128,7 @@ export function NewInvoiceClient({
         description: "",
         quantity: 1,
         unit: "hour",
-        unitPrice: "0,00",
+        unitPrice: "",
         vatRate: 19,
       },
     ]);
@@ -158,7 +167,8 @@ export function NewInvoiceClient({
               type="submit"
               name="intent"
               value="draft"
-              className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white shadow-sm"
+              disabled={!canSubmit}
+              className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
             >
               Als Entwurf speichern
             </button>
@@ -166,7 +176,8 @@ export function NewInvoiceClient({
               type="submit"
               name="intent"
               value="review_ready"
-              className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm"
+              disabled={!canSubmit}
+              className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
             >
               Als prüfbereit speichern
             </button>
@@ -480,9 +491,7 @@ export function NewInvoiceClient({
               <div className="px-5 py-4">
                 <textarea
                   name="notes"
-                  defaultValue={
-                    "Vielen Dank für die Zusammenarbeit.\nBitte begleichen Sie den Betrag bis zum Fälligkeitsdatum."
-                  }
+                  placeholder="Optionale Hinweise für diese Rechnung..."
                   rows={3}
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
                 />
@@ -572,7 +581,8 @@ export function NewInvoiceClient({
             type="submit"
             name="intent"
             value="draft"
-            className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white"
+            disabled={!canSubmit}
+            className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
             Als Entwurf speichern
           </button>
@@ -580,7 +590,8 @@ export function NewInvoiceClient({
             type="submit"
             name="intent"
             value="review_ready"
-            className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700"
+            disabled={!canSubmit}
+            className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Als prüfbereit speichern
           </button>
