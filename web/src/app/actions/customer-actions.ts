@@ -12,6 +12,7 @@ import {
   updateCustomerForUser,
   getCustomerForUser,
 } from "@/server/customers/customer-repository";
+import { redirect } from "next/navigation";
 
 export async function listCustomersAction() {
   const userId = await getCurrentUserId();
@@ -49,9 +50,12 @@ export async function createCustomerAction(formData: FormData) {
       String(formData.get("internalNotes") ?? "").trim() || undefined,
   };
 
-  await upsertCustomerForUser(userId, customer);
+  const savedCustomer = await upsertCustomerForUser(userId, customer);
+
   revalidatePath("/customers");
   revalidatePath("/invoices");
+
+  return savedCustomer;
 }
 
 export async function updateCustomerAction(formData: FormData) {
@@ -114,4 +118,15 @@ export async function getCustomerAction(customerId: string) {
   const userId = await getCurrentUserId();
 
   return getCustomerForUser(userId, customerId);
+}
+
+export async function createCustomerAndRedirectAction(formData: FormData) {
+  const customer = await createCustomerAction(formData);
+  const intent = String(formData.get("intent") ?? "detail");
+
+  if (intent === "invoice") {
+    redirect(`/invoices/new?customerId=${customer.id}`);
+  }
+
+  redirect(`/customers/${customer.id}`);
 }

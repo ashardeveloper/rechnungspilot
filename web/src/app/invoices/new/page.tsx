@@ -19,8 +19,13 @@ function addDays(date: Date, days: number) {
   return next;
 }
 
-export default async function NewInvoicePage() {
+export default async function NewInvoicePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ customerId?: string }>;
+}) {
   const session = await auth();
+  const params = await searchParams;
 
   if (!session?.user?.id) {
     redirect("/login");
@@ -46,6 +51,7 @@ export default async function NewInvoicePage() {
         customers={customers}
         seller={seller}
         invoiceNumber={invoiceNumber}
+        initialCustomerId={params.customerId}
         issueDate={isoDate(today)}
         dueDate={isoDate(addDays(today, 14))}
       />

@@ -24,6 +24,7 @@ type NewInvoiceClientProps = {
   invoiceNumber: string;
   issueDate: string;
   dueDate: string;
+  initialCustomerId?: string;
 };
 
 const unitLabels = {
@@ -42,10 +43,14 @@ export function NewInvoiceClient({
   invoiceNumber,
   issueDate,
   dueDate,
+  initialCustomerId,
 }: NewInvoiceClientProps) {
   const [customerQuery, setCustomerQuery] = useState("");
   const [selectedCustomerId, setSelectedCustomerId] = useState(
-    customers[0]?.id ?? "",
+    initialCustomerId &&
+      customers.some((customer) => customer.id === initialCustomerId)
+      ? initialCustomerId
+      : (customers[0]?.id ?? ""),
   );
   const [isCustomerPickerOpen, setIsCustomerPickerOpen] = useState(false);
   const [lineItems, setLineItems] = useState<DraftLineItem[]>([
