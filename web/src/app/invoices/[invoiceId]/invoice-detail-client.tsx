@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 
 import { listInvoiceAuditEventsAction } from "@/app/actions/invoice-audit-actions";
 import {
-  updateInvoiceAction,
   archiveInvoiceAction,
   copyInvoiceAsDraftAction,
+  updateInvoiceAction,
 } from "@/app/actions/invoice-actions";
 import { InvoiceEditor } from "@/components/invoices/invoice-editor";
 import { InvoicePreview } from "@/components/invoices/invoice-preview";
@@ -18,7 +19,6 @@ import {
   getInvoiceStatusTransitions,
   transitionInvoiceStatus,
 } from "@/domain/invoice-lifecycle";
-import { useRouter } from "next/navigation";
 
 type InvoiceDetailClientProps = {
   invoice: CanonicalInvoice;
@@ -29,16 +29,27 @@ export function InvoiceDetailClient({
   invoice,
   customers,
 }: InvoiceDetailClientProps) {
+  const router = useRouter();
   const [currentInvoice, setCurrentInvoice] = useState(invoice);
   const [auditEvents, setAuditEvents] = useState<InvoiceAuditEvent[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [isAuditOpen, setIsAuditOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
   const [hasLoadedAuditEvents, setHasLoadedAuditEvents] = useState(false);
-  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   const isLocked =
     currentInvoice.status === "issued" || currentInvoice.status === "paid";
+
+  function refreshAuditEvents(invoiceId: string) {
+    if (!hasLoadedAuditEvents) {
+      return;
+    }
+
+    startTransition(async () => {
+      const events = await listInvoiceAuditEventsAction(invoiceId);
+      setAuditEvents(events);
+    });
+  }
 
   function saveInvoice(nextInvoice: CanonicalInvoice) {
     startTransition(async () => {
@@ -48,34 +59,12 @@ export function InvoiceDetailClient({
 
       setCurrentInvoice(updatedInvoice);
       setIsEditing(false);
-
-      if (hasLoadedAuditEvents) {
-        const events = await listInvoiceAuditEventsAction(updatedInvoice.id);
-        setAuditEvents(events);
-      }
+      refreshAuditEvents(updatedInvoice.id);
     });
   }
 
   function updateInvoiceStatus(status: CanonicalInvoice["status"]) {
     saveInvoice(transitionInvoiceStatus(currentInvoice, status));
-  }
-
-  function loadAuditEvents() {
-    startTransition(async () => {
-      const events = await listInvoiceAuditEventsAction(currentInvoice.id);
-      setAuditEvents(events);
-      setHasLoadedAuditEvents(true);
-    });
-  }
-
-  function toggleAuditPanel() {
-    const nextValue = !isAuditOpen;
-
-    setIsAuditOpen(nextValue);
-
-    if (nextValue && !hasLoadedAuditEvents) {
-      loadAuditEvents();
-    }
   }
 
   function archiveInvoice() {
@@ -96,6 +85,19 @@ export function InvoiceDetailClient({
     });
   }
 
+  function toggleAuditPanel() {
+    const nextValue = !isAuditOpen;
+    setIsAuditOpen(nextValue);
+
+    if (nextValue && !hasLoadedAuditEvents) {
+      startTransition(async () => {
+        const events = await listInvoiceAuditEventsAction(currentInvoice.id);
+        setAuditEvents(events);
+        setHasLoadedAuditEvents(true);
+      });
+    }
+  }
+
   return (
     <>
       <InvoicePreview
@@ -103,7 +105,7 @@ export function InvoiceDetailClient({
         eyebrow={
           <Link
             href="/invoices"
-            className="text-sm font-medium text-cyan-700 hover:text-cyan-900"
+            className="inline-flex text-sm font-medium text-cyan-700 hover:text-cyan-900"
           >
             ← Zurück zur Rechnungsübersicht
           </Link>
@@ -124,7 +126,7 @@ export function InvoiceDetailClient({
               type="button"
               onClick={copyAsNewInvoice}
               disabled={isPending}
-              className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Als neue Rechnung kopieren
             </button>
@@ -134,7 +136,7 @@ export function InvoiceDetailClient({
                 type="button"
                 onClick={archiveInvoice}
                 disabled={isPending}
-                className="rounded-md border border-red-200 bg-white px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+                className="rounded-md border border-red-200 bg-white px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Archivieren
               </button>
@@ -147,11 +149,7 @@ export function InvoiceDetailClient({
                 onClick={() => updateInvoiceStatus(transition.targetStatus)}
                 disabled={isPending || Boolean(transition.blockedReason)}
                 title={transition.blockedReason}
-                className={
-                  transition.targetStatus === "paid"
-                    ? "rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
-                    : "rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
-                }
+                className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {transition.label}
               </button>
@@ -166,17 +164,18 @@ export function InvoiceDetailClient({
           invoice={currentInvoice}
           customers={customers}
           onSaveInvoice={saveInvoice}
+          onCancelEdit={() => setIsEditing(false)}
         />
       ) : null}
 
       {isLocked ? (
-        <section className="mx-auto max-w-6xl px-6 pb-8 print:hidden">
-          <div className="rounded-lg border border-slate-200 bg-white px-5 py-4">
-            <h2 className="text-lg font-semibold">Rechnung gesperrt</h2>
+        <section className="mx-auto max-w-6xl px-6 pb-6 print:hidden">
+          <div className="rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+            <h2 className="text-base font-semibold">Rechnung gesperrt</h2>
             <p className="mt-1 text-sm text-slate-600">
-              Ausgestellte oder bezahlte Rechnungen sind in dieser Demo nicht
-              mehr direkt bearbeitbar. Korrekturen werden später als eigener
-              Workflow modelliert.
+              Ausgestellte oder bezahlte Rechnungen sind nicht direkt
+              bearbeitbar. Korrekturen werden später als eigener Workflow
+              modelliert.
             </p>
           </div>
         </section>
@@ -193,7 +192,7 @@ export function InvoiceDetailClient({
               <h2 className="text-base font-semibold">Historie</h2>
               <p className="mt-1 text-sm text-slate-600">
                 Technische Ereignisse zu Erstellung, Änderungen, Statuswechseln
-                und PDF-Downloads.
+                und Downloads.
               </p>
             </div>
 
