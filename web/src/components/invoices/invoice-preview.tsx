@@ -17,7 +17,7 @@ export function InvoicePreview({
   actions,
   eyebrow,
 }: InvoicePreviewProps) {
-  const canDownloadPdf =
+  const canDownloadExports =
     invoice.status === "issued" || invoice.status === "paid";
 
   return (
@@ -67,20 +67,39 @@ export function InvoicePreview({
           <div className="mt-4 flex flex-wrap gap-2 print:hidden">
             {actions}
 
-            {canDownloadPdf ? (
-              <a
-                href={`/invoices/${invoice.id}/pdf`}
-                className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-              >
-                PDF herunterladen
-              </a>
+            {canDownloadExports ? (
+              <>
+                <a
+                  href={`/invoices/${invoice.id}/pdf`}
+                  className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                >
+                  PDF herunterladen
+                </a>
+
+                <a
+                  href={`/invoices/${invoice.id}/xrechnung`}
+                  title="Technischer XML-Entwurf, keine rechtliche Zertifizierung."
+                  className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                >
+                  XRechnung XML
+                </a>
+              </>
             ) : (
-              <span
-                title="PDF-Download ist erst nach dem Ausstellen verfügbar."
-                className="rounded-md border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-400"
-              >
-                PDF erst nach Ausstellung
-              </span>
+              <>
+                <span
+                  title="PDF-Download ist erst nach dem Ausstellen verfügbar."
+                  className="rounded-md border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-400"
+                >
+                  PDF erst nach Ausstellung
+                </span>
+
+                <span
+                  title="XRechnung XML ist erst nach dem Ausstellen verfügbar."
+                  className="rounded-md border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-400"
+                >
+                  XML erst nach Ausstellung
+                </span>
+              </>
             )}
           </div>
         </div>

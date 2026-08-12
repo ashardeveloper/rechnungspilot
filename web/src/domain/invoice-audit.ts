@@ -6,8 +6,8 @@ export type InvoiceAuditEvent = {
     | "updated"
     | "status_changed"
     | "pdf_downloaded"
+    | "xrechnung_downloaded"
     | "archived";
-  x;
   message: string;
   createdAt: string;
 };
