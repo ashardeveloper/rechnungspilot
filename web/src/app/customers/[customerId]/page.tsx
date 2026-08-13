@@ -100,6 +100,10 @@ export default async function CustomerDetailPage({
     auth(),
   ]);
 
+  if (!session?.user?.id) {
+    redirect("/login");
+  }
+
   const isEditing = queryParams.edit === "1";
   const customer = await getCustomerAction(customerId);
 
@@ -129,7 +133,12 @@ export default async function CustomerDetailPage({
   const latestInvoice = invoices[0];
 
   return (
-    <AppShell activePath="/customers">
+    <AppShell
+      title={customer.name}
+      description="Kundendetails, Rechnungen und Standardwerte verwalten."
+      userEmail={session.user.email ?? "Angemeldeter Nutzer"}
+      activePath="/customers"
+    >
       <main className="min-h-screen bg-slate-50 text-slate-950">
         <section className="border-b border-slate-200 bg-white">
           <div className="mx-auto max-w-6xl px-6 py-7">

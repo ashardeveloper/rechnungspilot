@@ -28,7 +28,7 @@ export function AppShell({
     <main className="min-h-screen bg-slate-50 text-slate-950">
       <header className="border-b border-slate-200 bg-white/95 shadow-sm print:hidden">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
-          <Link href="/invoices" className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-950 text-white">
               <FileText size={18} />
             </span>

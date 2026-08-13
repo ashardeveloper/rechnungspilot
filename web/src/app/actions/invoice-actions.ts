@@ -235,21 +235,36 @@ export async function createInvoiceFromFormAction(formData: FormData) {
   const unitPrices = formData.getAll("unitPrice").map(String);
   const vatRates = formData.getAll("vatRate").map(Number);
 
-  const lineItems: InvoiceLineItem[] = descriptions
-    .map((description, index) => ({
-      description: description.trim(),
-      quantity: quantities[index] || 0,
-      unit:
-        units[index] === "day" || units[index] === "piece"
-          ? units[index]
-          : "hour",
-      unitPriceCents: Math.round(
-        Number(unitPrices[index]?.replace(",", ".") || 0) * 100,
-      ),
-      vatCategory: vatRates[index] === 0 ? "exempt" : "standard",
-      vatRatePercent:
-        vatRates[index] === 7 ? 7 : vatRates[index] === 0 ? 0 : 19,
-    }))
+  function toInvoiceUnit(value: string): InvoiceLineItem["unit"] {
+    if (value === "day" || value === "piece") {
+      return value;
+    }
+
+    return "hour";
+  }
+
+  function toVatRate(value: number): InvoiceLineItem["vatRatePercent"] {
+    if (value === 0 || value === 7) {
+      return value;
+    }
+
+    return 19;
+  }
+  const lineItems = descriptions
+    .map((description, index): InvoiceLineItem => {
+      const vatRate = toVatRate(vatRates[index]);
+
+      return {
+        description: description.trim(),
+        quantity: quantities[index] || 0,
+        unit: toInvoiceUnit(units[index]),
+        unitPriceCents: Math.round(
+          Number(unitPrices[index]?.replace(",", ".") || 0) * 100,
+        ),
+        vatCategory: vatRate === 0 ? "exempt" : "standard",
+        vatRatePercent: vatRate,
+      };
+    })
     .filter((item) => item.description && item.quantity > 0);
 
   if (lineItems.length === 0) {
