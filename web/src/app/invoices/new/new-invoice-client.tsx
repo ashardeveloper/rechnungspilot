@@ -27,12 +27,6 @@ type NewInvoiceClientProps = {
   initialCustomerId?: string;
 };
 
-const unitLabels = {
-  hour: "Std.",
-  day: "Tag",
-  piece: "Stück",
-};
-
 function centsFromPrice(value: string) {
   return Math.round(Number(value.replace(",", ".") || 0) * 100);
 }

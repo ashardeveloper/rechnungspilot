@@ -7,7 +7,7 @@ import {
   getInvoiceDueStatusLabel,
 } from "@/domain/invoice-due-status";
 import Link from "next/link";
-import { ChevronRight, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 
 type InvoiceListProps = {
   invoices: CanonicalInvoice[];

@@ -43,8 +43,7 @@ export function CustomerManagementClient({
           (invoice) => invoice.buyer.name === customer.name,
         );
         const openInvoices = customerInvoices.filter(
-          (invoice) =>
-            invoice.status !== "paid" && invoice.status !== "archived",
+          (invoice) => invoice.status !== "paid",
         );
         const latestInvoice = customerInvoices[0];
         const revenueCents = customerInvoices.reduce(

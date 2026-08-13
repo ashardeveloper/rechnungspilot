@@ -9,7 +9,6 @@ import { AppShell } from "@/components/layout/app-shell";
 import { auth } from "@/server/auth/auth";
 
 import { InvoiceListClient } from "./invoice-list-client";
-import type { InvoiceStatus } from "@/domain/invoice";
 
 export default async function InvoicesPage({
   searchParams,
