@@ -65,7 +65,7 @@ Default local values:
 
 ```txt
 DATABASE_URL="postgresql://rechnungspilot:rechnungspilot@localhost:5433/rechnungspilot?schema=public"
-AUTH_SECRET="replace-with-local-secret"
+AUTH_SECRET="replace-with-a-long-random-secret"
 NEXTAUTH_URL="http://localhost:3000"
 ```
 
@@ -120,6 +120,29 @@ database integration tests
 production build
 ```
 
+## Continuous Integration
+
+The repository includes a GitHub Actions workflow at:
+
+```txt
+.github/workflows/ci.yml
+```
+
+The CI pipeline starts a PostgreSQL service container and runs:
+
+```txt
+npm ci
+Prisma client generation
+Prisma migrations
+demo seed
+lint
+unit tests
+database integration tests
+production build
+```
+
+This keeps the portfolio demo close to a real SaaS delivery workflow.
+
 ## Useful Commands
 
 ```bash
@@ -128,6 +151,8 @@ npm run lint
 npm test
 npm run test:db
 npm run build
+npm run verify
+npm run db:generate
 npm run db:migrate
 npm run db:seed
 npm run db:studio
@@ -139,14 +164,53 @@ The app uses server actions and repository modules to keep UI code separated fro
 
 Invoices and customers are scoped to the authenticated user. The current demo uses a seeded demo user, but the code is structured so real auth/user management can replace the demo account without rewriting the core invoice/customer repositories.
 
-## Deployment Notes
+## Deployment
 
-The app is PostgreSQL-ready. For a hosted portfolio deployment, use a managed PostgreSQL provider and set the production environment variables accordingly.
+The app is ready for deployment on a hosted Next.js platform such as Vercel.
 
-Recommended production env variables:
+Recommended production setup:
+
+```txt
+Web hosting: Vercel or equivalent
+Database: managed PostgreSQL
+ORM: Prisma
+Auth: Auth.js credentials flow for demo, replaceable with production auth later
+```
+
+Required production environment variables:
 
 ```txt
 DATABASE_URL
 AUTH_SECRET
 NEXTAUTH_URL
 ```
+
+For production, `DATABASE_URL` should point to a managed PostgreSQL database.
+
+Example shape:
+
+```txt
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
+AUTH_SECRET="use-a-long-random-production-secret"
+NEXTAUTH_URL="https://your-production-domain.example"
+```
+
+Before production deployment, apply migrations:
+
+```bash
+cd web
+npx prisma migrate deploy
+```
+
+## Demo Data Strategy
+
+`npm run db:seed` creates a local demo workspace:
+
+```txt
+Email: demo@rechnungspilot.local
+Password: rechnungspilot-demo
+```
+
+This seed is intended for local development and portfolio review only.
+
+Do not run demo seed automatically in a real production environment unless the deployment is explicitly a public demo instance.
