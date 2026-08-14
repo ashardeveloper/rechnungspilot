@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  verify:
+    name: Verify web app
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: rechnungspilot
+          POSTGRES_USER: rechnungspilot
+          POSTGRES_PASSWORD: rechnungspilot
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U rechnungspilot -d rechnungspilot"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://rechnungspilot:rechnungspilot@localhost:5433/rechnungspilot?schema=public
+      AUTH_SECRET: ci-auth-secret-for-rechnungspilot
+      NEXTAUTH_URL: http://localhost:3000
+
+    defaults:
+      run:
+        working-directory: web
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npm run db:generate
+
+      - name: Apply database migrations
+        run: npx prisma migrate deploy
+
+      - name: Seed demo data
+        run: npm run db:seed
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Database integration tests
+        run: npm run test:db
+
+      - name: Production build
+        run: npm run build
