@@ -17,12 +17,9 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
-      AUTH_URL: ${{ secrets.NEXTAUTH_URL }}
-      NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
 
     defaults:
       run:
@@ -47,8 +44,16 @@ jobs:
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
+      - name: Create Vercel project link
+        run: |
+          mkdir -p .vercel
+          printf '{"orgId":"%s","projectId":"%s"}' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > .vercel/project.json
+
+      - name: Pull Vercel production environment
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+
       - name: Build production artifacts
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --prod --token="$VERCEL_TOKEN"
 
       - name: Deploy prebuilt production artifacts
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
