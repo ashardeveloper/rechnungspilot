@@ -16,5 +16,21 @@ services:
       timeout: 5s
       retries: 10
 
+  web:
+    build:
+      context: ./web
+    container_name: rechnungspilot-web
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://rechnungspilot:rechnungspilot@postgres:5432/rechnungspilot?schema=public
+      AUTH_SECRET: docker-local-secret-change-me
+      AUTH_URL: http://localhost:3001
+      NEXTAUTH_URL: http://localhost:3001
+      AUTH_TRUST_HOST: "true"
+    ports:
+      - "3001:3000"
+
 volumes:
   rechnungspilot-postgres-data:
