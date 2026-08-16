@@ -20,7 +20,7 @@ export async function signInWithPassword(formData: FormData) {
     throw error;
   }
 
-  redirect("/invoices");
+  redirect("/");
 }
 
 export async function signOutCurrentUser() {

@@ -57,7 +57,7 @@ export default async function HomePage() {
 
   return (
     <AppShell
-      title="Willkommen zurück, Ashar"
+      title="Willkommen zurück"
       description="Hier ist dein Rechnungsüberblick."
       userEmail={session.user.email ?? "Angemeldeter Nutzer"}
       activePath="/invoices"
