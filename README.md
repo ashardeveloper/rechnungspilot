@@ -36,15 +36,44 @@ Password: rechnungspilot-demo
 
 ## Screenshots
 
+### Login
+
 ![Login](docs/screenshots/login.png)
+
+### Dashboard
+
 ![Dashboard](docs/screenshots/dashboard.png)
+
+### Invoices
+
 ![Invoices](docs/screenshots/invoices.png)
+
+### Invoice Detail
+
 ![Invoice Detail](docs/screenshots/invoice-detail.png)
+
+### New Invoice
+
 ![New Invoice](docs/screenshots/new-invoice.png)
+
+### Archive Invoices
+
 ![Archive Invoices](docs/screenshots/archive-invoices.png)
+
+### Customers
+
 ![Customers](docs/screenshots/customers.png)
+
+### Customer Detail
+
 ![Customer Detail](docs/screenshots/customer-detail.png)
+
+### New Customer
+
 ![New Customer](docs/screenshots/new-customer.png)
+
+### Settings
+
 ![Settings](docs/screenshots/settings.png)
 
 ## Case Study
