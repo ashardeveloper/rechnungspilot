@@ -2,7 +2,80 @@
 
 SaaS-style invoicing workspace for German freelancers and small businesses.
 
-The project demonstrates a production-shaped invoice workflow: authenticated workspace, PostgreSQL persistence, customer management, invoice creation/editing, PDF download, technical XRechnung XML draft export, audit history, archive/restore, and configurable invoice numbering/sender profile.
+RechnungsPilot DE demonstrates a production-shaped invoice workflow: authenticated workspace, PostgreSQL persistence, customer management, invoice creation/editing, PDF download, technical XRechnung XML draft export, audit history, archive/restore, configurable invoice numbering, sender profile settings, Docker support, CI, and CD.
+
+## Live Demo
+
+[https://rechnungspilot-ten.vercel.app/](https://rechnungspilot-ten.vercel.app/)
+
+Demo login:
+
+```txt
+Email: demo@rechnungspilot.local
+Password: rechnungspilot-demo
+
+```
+
+## Project Highlights
+
+- Production-style SaaS dashboard
+- Login-protected workspace
+- PostgreSQL persistence with Prisma
+- Customer directory with search and load more
+- Customer detail pages and customer-specific invoice creation
+- Invoice creation from real form input
+- Invoice search, status filters, due-status tracking, archive and restore
+- Invoice lifecycle controls with locked issued/paid behavior
+- PDF invoice download
+- Technical XRechnung XML draft download
+- Invoice audit/history timeline
+- Configurable sender profile and invoice numbering
+- Dockerized app and PostgreSQL setup
+- GitHub Actions CI
+- GitHub Actions CD trigger for Vercel deployment
+
+## Screenshots
+
+![Login](docs/screenshots/login.png)
+![Dashboard](docs/screenshots/dashboard.png)
+![Invoices](docs/screenshots/invoices.png)
+![Invoice Detail](docs/screenshots/invoice-detail.png)
+![New Invoice](docs/screenshots/new-invoice.png)
+![Archive Invoices](docs/screenshots/archive-invoices.png)
+![Customers](docs/screenshots/customers.png)
+![Customer Detail](docs/screenshots/customer-detail.png)
+![New Customer](docs/screenshots/new-customer.png)
+![Settings](docs/screenshots/settings.png)
+
+## Case Study
+
+### Problem
+
+Small businesses and freelancers need a clear way to create invoices, manage customers, track invoice status, and export documents without turning the workflow into a complex accounting system.
+
+### Solution
+
+RechnungsPilot DE focuses on a practical invoicing workflow:
+
+1. Manage reusable customer master data.
+2. Create invoices from structured form input.
+3. Track invoice lifecycle from draft to review-ready, issued, and paid.
+4. Lock issued/paid invoices to avoid accidental changes.
+5. Export issued invoices as PDF and technical XRechnung XML draft.
+6. Keep an audit history of invoice events.
+7. Configure invoice numbering and sender profile from settings.
+
+### Engineering Focus
+
+The project is structured like a real SaaS app rather than a static demo.
+
+- Server actions handle user-facing mutations.
+- Repository modules isolate persistence logic.
+- Domain modules hold invoice calculations, lifecycle rules, due-status logic, and export mapping.
+- Prisma models enforce relational persistence.
+- Tests cover domain rules and database authorization behavior.
+- CI verifies lint, unit tests, DB integration tests, and production build.
+- CD triggers Vercel deployment after successful CI.
 
 ## Tech Stack
 
@@ -10,14 +83,20 @@ The project demonstrates a production-shaped invoice workflow: authenticated wor
 - TypeScript
 - Tailwind CSS
 - Prisma ORM
-- PostgreSQL via Docker
+- PostgreSQL
 - Auth.js credentials login
 - Vitest unit and DB integration tests
 - PDFKit for invoice PDF generation
+- Docker and Docker Compose
+- GitHub Actions CI/CD
+- Vercel deployment
+- Neon PostgreSQL
 
 ## Scope
 
-This is a portfolio MVP. It is intentionally not a certified accounting, tax, DATEV, ELSTER, Peppol, or payment product.
+This is a portfolio MVP.
+
+It is intentionally not a certified accounting, tax, DATEV, ELSTER, Peppol, payment, or legal invoicing product.
 
 XRechnung export is implemented as a technical XML draft for demonstration only. It is not legal certification.
 
@@ -35,6 +114,8 @@ XRechnung export is implemented as a technical XML draft for demonstration only.
 - Technical XRechnung XML draft download for issued/paid invoices
 - Audit timeline for invoice activity
 - Sender profile and invoice numbering settings
+- Dockerized local production-style runtime
+- CI and CD workflows
 
 ## Local Setup
 
@@ -46,7 +127,7 @@ From the repository root:
 docker compose up -d postgres
 ```
 
-Postgres runs on:
+PostgreSQL runs on:
 
 ```txt
 localhost:5433
@@ -102,6 +183,23 @@ Open:
 http://localhost:3000
 ```
 
+## Docker
+
+Build and run the app with Docker Compose:
+
+```bash
+cd /d/Projects/RechnungsPilot
+docker compose build web
+docker compose up -d postgres
+docker compose up -d web
+```
+
+Docker app URL:
+
+```txt
+http://localhost:3001
+```
+
 ## Verification
 
 Run the full verification suite:
@@ -143,74 +241,21 @@ production build
 
 This keeps the portfolio demo close to a real SaaS delivery workflow.
 
-## Useful Commands
+## Continuous Deployment
 
-```bash
-npm run dev
-npm run lint
-npm test
-npm run test:db
-npm run build
-npm run verify
-npm run db:generate
-npm run db:migrate
-npm run db:seed
-npm run db:studio
-```
-
-## Current Architecture
-
-The app uses server actions and repository modules to keep UI code separated from persistence logic.
-
-Invoices and customers are scoped to the authenticated user. The current demo uses a seeded demo user, but the code is structured so real auth/user management can replace the demo account without rewriting the core invoice/customer repositories.
-
-## Deployment
-
-The app is ready for deployment on a hosted Next.js platform such as Vercel.
-
-Recommended production setup:
+The repository includes a deployment workflow at:
 
 ```txt
-Web hosting: Vercel or equivalent
-Database: managed PostgreSQL
-ORM: Prisma
-Auth: Auth.js credentials flow for demo, replaceable with production auth later
+.github/workflows/deploy.yml
 ```
 
-Required production environment variables:
+After CI passes on `main`, the deployment workflow triggers a Vercel production deployment.
+
+Current deployment setup:
 
 ```txt
-DATABASE_URL
-AUTH_SECRET
-NEXTAUTH_URL
+Hosting: Vercel
+Database: Neon PostgreSQL
+CI: GitHub Actions
+CD: GitHub Actions + Vercel deploy hook
 ```
-
-For production, `DATABASE_URL` should point to a managed PostgreSQL database.
-
-Example shape:
-
-```txt
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
-AUTH_SECRET="use-a-long-random-production-secret"
-NEXTAUTH_URL="https://your-production-domain.example"
-```
-
-Before production deployment, apply migrations:
-
-```bash
-cd web
-npx prisma migrate deploy
-```
-
-## Demo Data Strategy
-
-`npm run db:seed` creates a local demo workspace:
-
-```txt
-Email: demo@rechnungspilot.local
-Password: rechnungspilot-demo
-```
-
-This seed is intended for local development and portfolio review only.
-
-Do not run demo seed automatically in a real production environment unless the deployment is explicitly a public demo instance.
