@@ -56,10 +56,6 @@ Password: rechnungspilot-demo
 
 ![New Invoice](docs/screenshots/new-invoice.png)
 
-### Archive Invoices
-
-![Archive Invoices](docs/screenshots/archive-invoices.png)
-
 ### Customers
 
 ![Customers](docs/screenshots/customers.png)
@@ -71,6 +67,10 @@ Password: rechnungspilot-demo
 ### New Customer
 
 ![New Customer](docs/screenshots/new-customer.png)
+
+### Archive Invoices
+
+![Archive Invoices](docs/screenshots/archive-invoices.png)
 
 ### Settings
 
